@@ -6,6 +6,7 @@ const google = createGoogleGenerativeAI({
 });
 
 export async function generatePlan(athlete, profile, fixtures, metrics) {
+  console.log('VITE_GEMINI_API_KEY value:', import.meta.env.VITE_GEMINI_API_KEY);
   if (!import.meta.env.VITE_GEMINI_API_KEY || import.meta.env.VITE_GEMINI_API_KEY === 'your-gemini-api-key-here') {
     return 'Please add your VITE_GEMINI_API_KEY to .env and restart the server to enable AI generation.';
   }
