@@ -1,0 +1,316 @@
+[
+  {
+    "id": 1,
+    "date": "2024-01-12",
+    "time": "15:00",
+    "competition": "Premier League",
+    "home_team": "Medinah FC",
+    "away_team": "Arsenal FC",
+    "venue": "Home Stadium",
+    "match_type": "League",
+    "squad_id": 1,
+    "squad_name": "First Team",
+    "result": "Win",
+    "score": "2-1",
+    "home_score": 2,
+    "away_score": 1,
+    "attendance": 45000,
+    "referee": "Michael Oliver",
+    "weather": "Clear",
+    "temperature": "12°C",
+    "surface": "Natural Grass",
+    "match_status": "Completed",
+    "player_performances": [
+      {
+        "athlete_id": 1,
+        "athlete_name": "Marcus Johnson",
+        "position": "Forward",
+        "minutes_played": 90,
+        "goals": 1,
+        "assists": 0,
+        "shots": 4,
+        "shots_on_target": 2,
+        "passes": 32,
+        "pass_accuracy": 84,
+        "tackles": 1,
+        "yellow_cards": 0,
+        "red_cards": 0,
+        "rating": 8.2
+      },
+      {
+        "athlete_id": 3,
+        "athlete_name": "David Chen",
+        "position": "Defender",
+        "minutes_played": 90,
+        "goals": 0,
+        "assists": 1,
+        "shots": 1,
+        "shots_on_target": 0,
+        "passes": 68,
+        "pass_accuracy": 92,
+        "tackles": 6,
+        "yellow_cards": 1,
+        "red_cards": 0,
+        "rating": 7.8
+      },
+      {
+        "athlete_id": 4,
+        "athlete_name": "Sarah Williams",
+        "position": "Goalkeeper",
+        "minutes_played": 90,
+        "goals": 0,
+        "assists": 0,
+        "shots": 0,
+        "shots_on_target": 0,
+        "passes": 23,
+        "pass_accuracy": 78,
+        "saves": 4,
+        "yellow_cards": 0,
+        "red_cards": 0,
+        "rating": 7.5
+      }
+    ],
+    "team_stats": {
+      "possession": 58,
+      "total_shots": 14,
+      "shots_on_target": 6,
+      "corners": 7,
+      "fouls": 12,
+      "offsides": 3,
+      "pass_accuracy": 87
+    },
+    "events": [
+      {
+        "minute": 23,
+        "type": "Goal",
+        "player": "Marcus Johnson",
+        "description": "Header from cross"
+      },
+      {
+        "minute": 45,
+        "type": "Yellow Card",
+        "player": "David Chen",
+        "description": "Tactical foul"
+      },
+      {
+        "minute": 67,
+        "type": "Goal",
+        "player": "Emma Davis",
+        "description": "Long range shot"
+      },
+      {
+        "minute": 82,
+        "type": "Goal",
+        "player": "Opposition Player",
+        "description": "Penalty kick"
+      }
+    ],
+    "notes": "Strong performance. Good team cohesion and defensive stability.",
+    "created_at": "2024-01-12T13:00:00Z",
+    "updated_at": "2024-01-12T17:30:00Z"
+  },
+  {
+    "id": 2,
+    "date": "2024-01-05",
+    "time": "19:45",
+    "competition": "FA Cup",
+    "home_team": "Manchester United",
+    "away_team": "Medinah FC",
+    "venue": "Old Trafford",
+    "match_type": "Cup",
+    "squad_id": 1,
+    "squad_name": "First Team",
+    "result": "Draw",
+    "score": "1-1",
+    "home_score": 1,
+    "away_score": 1,
+    "attendance": 74000,
+    "referee": "Martin Atkinson",
+    "weather": "Overcast",
+    "temperature": "8°C",
+    "surface": "Natural Grass",
+    "match_status": "Completed",
+    "player_performances": [
+      {
+        "athlete_id": 2,
+        "athlete_name": "Elena Rodriguez",
+        "position": "Midfielder",
+        "minutes_played": 75,
+        "goals": 0,
+        "assists": 1,
+        "shots": 2,
+        "shots_on_target": 1,
+        "passes": 54,
+        "pass_accuracy": 89,
+        "tackles": 3,
+        "yellow_cards": 0,
+        "red_cards": 0,
+        "rating": 7.9
+      },
+      {
+        "athlete_id": 5,
+        "athlete_name": "Alex Thompson",
+        "position": "Forward",
+        "minutes_played": 65,
+        "goals": 1,
+        "assists": 0,
+        "shots": 3,
+        "shots_on_target": 2,
+        "passes": 28,
+        "pass_accuracy": 82,
+        "tackles": 0,
+        "yellow_cards": 0,
+        "red_cards": 0,
+        "rating": 8.1
+      }
+    ],
+    "team_stats": {
+      "possession": 42,
+      "total_shots": 9,
+      "shots_on_target": 4,
+      "corners": 4,
+      "fouls": 14,
+      "offsides": 2,
+      "pass_accuracy": 83
+    },
+    "events": [
+      {
+        "minute": 34,
+        "type": "Goal",
+        "player": "Alex Thompson",
+        "description": "Counter-attack finish"
+      },
+      {
+        "minute": 58,
+        "type": "Goal",
+        "player": "Opposition Player",
+        "description": "Corner kick header"
+      },
+      {
+        "minute": 75,
+        "type": "Substitution",
+        "player": "Elena Rodriguez",
+        "description": "Tactical substitution"
+      }
+    ],
+    "notes": "Solid away performance. Good defensive organization throughout.",
+    "created_at": "2024-01-05T17:45:00Z",
+    "updated_at": "2024-01-05T22:00:00Z"
+  },
+  {
+    "id": 3,
+    "date": "2023-12-28",
+    "time": "14:30",
+    "competition": "Premier League",
+    "home_team": "Medinah FC",
+    "away_team": "Chelsea FC",
+    "venue": "Home Stadium",
+    "match_type": "League",
+    "squad_id": 1,
+    "squad_name": "First Team",
+    "result": "Loss",
+    "score": "0-2",
+    "home_score": 0,
+    "away_score": 2,
+    "attendance": 42000,
+    "referee": "Anthony Taylor",
+    "weather": "Rain",
+    "temperature": "6°C",
+    "surface": "Natural Grass",
+    "match_status": "Completed",
+    "player_performances": [
+      {
+        "athlete_id": 7,
+        "athlete_name": "James Wilson",
+        "position": "Defender",
+        "minutes_played": 90,
+        "goals": 0,
+        "assists": 0,
+        "shots": 0,
+        "shots_on_target": 0,
+        "passes": 72,
+        "pass_accuracy": 88,
+        "tackles": 4,
+        "yellow_cards": 0,
+        "red_cards": 0,
+        "rating": 6.8
+      },
+      {
+        "athlete_id": 6,
+        "athlete_name": "Emma Davis",
+        "position": "Midfielder",
+        "minutes_played": 90,
+        "goals": 0,
+        "assists": 0,
+        "shots": 3,
+        "shots_on_target": 1,
+        "passes": 45,
+        "pass_accuracy": 85,
+        "tackles": 2,
+        "yellow_cards": 1,
+        "red_cards": 0,
+        "rating": 6.5
+      }
+    ],
+    "team_stats": {
+      "possession": 52,
+      "total_shots": 11,
+      "shots_on_target": 3,
+      "corners": 6,
+      "fouls": 16,
+      "offsides": 1,
+      "pass_accuracy": 86
+    },
+    "events": [
+      {
+        "minute": 31,
+        "type": "Goal",
+        "player": "Opposition Player",
+        "description": "Free kick"
+      },
+      {
+        "minute": 67,
+        "type": "Yellow Card",
+        "player": "Emma Davis",
+        "description": "Dissent"
+      },
+      {
+        "minute": 89,
+        "type": "Goal",
+        "player": "Opposition Player",
+        "description": "Counter-attack"
+      }
+    ],
+    "notes": "Tough loss. Weather conditions affected play quality.",
+    "created_at": "2023-12-28T12:30:00Z",
+    "updated_at": "2023-12-28T16:45:00Z"
+  },
+  {
+    "id": 4,
+    "date": "2024-01-18",
+    "time": "20:00",
+    "competition": "Premier League",
+    "home_team": "Liverpool FC",
+    "away_team": "Medinah FC",
+    "venue": "Anfield",
+    "match_type": "League",
+    "squad_id": 1,
+    "squad_name": "First Team",
+    "result": "Scheduled",
+    "score": "vs",
+    "home_score": null,
+    "away_score": null,
+    "attendance": null,
+    "referee": "Paul Tierney",
+    "weather": "TBD",
+    "temperature": "TBD",
+    "surface": "Natural Grass",
+    "match_status": "Upcoming",
+    "player_performances": [],
+    "team_stats": {},
+    "events": [],
+    "notes": "Important away fixture. Strong opponent preparation required.",
+    "created_at": "2024-01-15T10:00:00Z",
+    "updated_at": "2024-01-15T10:00:00Z"
+  }
+]

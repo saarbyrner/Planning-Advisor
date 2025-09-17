@@ -1,0 +1,138 @@
+[
+  {
+    "id": "premier-league",
+    "name": "Premier League",
+    "sport": "Football",
+    "logo": "premier-league",
+    "teams": [
+      {
+        "id": "arsenal",
+        "name": "Arsenal FC",
+        "city": "London",
+        "founded": 1886,
+        "stadium": "Emirates Stadium",
+        "capacity": 60260,
+        "logo": "arsenal",
+        "league": "premier-league"
+      },
+      {
+        "id": "chelsea",
+        "name": "Chelsea FC", 
+        "city": "London",
+        "founded": 1905,
+        "stadium": "Stamford Bridge",
+        "capacity": 40834,
+        "logo": "chelsea",
+        "league": "premier-league"
+      },
+      {
+        "id": "liverpool",
+        "name": "Liverpool FC",
+        "city": "Liverpool", 
+        "founded": 1892,
+        "stadium": "Anfield",
+        "capacity": 54074,
+        "logo": "liverpool",
+        "league": "premier-league"
+      },
+      {
+        "id": "manchester-united",
+        "name": "Manchester United FC",
+        "city": "Manchester",
+        "founded": 1878,
+        "stadium": "Old Trafford",
+        "capacity": 74140,
+        "logo": "manchester-united",
+        "league": "premier-league"
+      },
+      {
+        "id": "manchester-city",
+        "name": "Manchester City FC",
+        "city": "Manchester",
+        "founded": 1880,
+        "stadium": "Etihad Stadium", 
+        "capacity": 55017,
+        "logo": "manchester-city",
+        "league": "premier-league"
+      },
+      {
+        "id": "tottenham",
+        "name": "Tottenham Hotspur FC",
+        "city": "London",
+        "founded": 1882,
+        "stadium": "Tottenham Hotspur Stadium",
+        "capacity": 62850,
+        "logo": "tottenham",
+        "league": "premier-league"
+      },
+      {
+        "id": "everton",
+        "name": "Everton FC",
+        "city": "Liverpool",
+        "founded": 1878,
+        "stadium": "Goodison Park",
+        "capacity": 39414,
+        "logo": "everton",
+        "league": "premier-league"
+      },
+      {
+        "id": "leeds-united",
+        "name": "Leeds United FC",
+        "city": "Leeds",
+        "founded": 1919,
+        "stadium": "Elland Road",
+        "capacity": 37890,
+        "logo": "leeds-united",
+        "league": "premier-league"
+      }
+    ]
+  },
+  {
+    "id": "nba",
+    "name": "National Basketball Association",
+    "sport": "Basketball",
+    "logo": "nba", 
+    "teams": [
+      {
+        "id": "lakers",
+        "name": "Los Angeles Lakers",
+        "city": "Los Angeles",
+        "founded": 1947,
+        "arena": "Crypto.com Arena",
+        "capacity": 18997,
+        "logo": "lakers",
+        "league": "nba"
+      },
+      {
+        "id": "warriors",
+        "name": "Golden State Warriors",
+        "city": "San Francisco",
+        "founded": 1946,
+        "arena": "Chase Center", 
+        "capacity": 18064,
+        "logo": "warriors",
+        "league": "nba"
+      },
+      {
+        "id": "bulls",
+        "name": "Chicago Bulls",
+        "city": "Chicago",
+        "founded": 1966,
+        "arena": "United Center",
+        "capacity": 20917,
+        "logo": "bulls",
+        "league": "nba"
+      },
+      {
+        "id": "celtics",
+        "name": "Boston Celtics",
+        "city": "Boston",
+        "founded": 1946,
+        "arena": "TD Garden",
+        "capacity": 19156,
+        "logo": "celtics",
+        "league": "nba"
+      }
+    ]
+  }
+]

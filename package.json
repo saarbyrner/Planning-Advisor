@@ -1,0 +1,47 @@
+{
+  "name": "design-prototype-template",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Design prototype template with comprehensive design system and navigation",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "lint": "eslint src --ext .js,.jsx",
+    "lint:fix": "eslint src --ext .js,.jsx --fix",
+    "lint:css": "stylelint 'src/**/*.css'",
+    "lint:css:fix": "stylelint 'src/**/*.css' --fix",
+    "validate-design-system": "node scripts/validate-design-system.js",
+    "validate-quick": "npm run lint && npm run lint:css"
+  },
+  "dependencies": {
+    "@ai-sdk/openai": "^2.0.32",
+    "@emotion/react": "^11.11.0",
+    "@emotion/styled": "^11.11.0",
+    "@mui/icons-material": "^5.14.3",
+    "@mui/material": "^5.14.3",
+    "@mui/x-data-grid-premium": "^6.20.5",
+    "@supabase/supabase-js": "^2.57.4",
+    "prop-types": "^15.8.1",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-router-dom": "^6.2.1"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^4.0.3",
+    "eslint": "^8.34.0",
+    "eslint-plugin-design-system": "file:./eslint-plugin-design-system",
+    "eslint-plugin-react": "^7.32.0",
+    "eslint-plugin-react-hooks": "^4.6.0",
+    "husky": "^8.0.3",
+    "stylelint": "^15.0.0",
+    "stylelint-config-standard": "^30.0.0",
+    "stylelint-plugin-design-system": "file:./stylelint-plugin-design-system",
+    "vite": "^4.4.5"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "npm run validate-design-system"
+    }
+  }
+}

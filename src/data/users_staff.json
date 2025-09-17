@@ -1,0 +1,341 @@
+[
+  {
+    "id": 1,
+    "username": "r.martinez",
+    "email": "roberto.martinez@medinahfc.com",
+    "firstname": "Roberto",
+    "lastname": "Martinez",
+    "role": "Head Coach",
+    "permission_group": "Coaching Staff",
+    "is_active": true,
+    "is_admin": false,
+    "organisation_id": 1,
+    "organisation_name": "Medinah FC",
+    "department": "Coaching",
+    "phone": "+44 20 7946 0958",
+    "emergency_contact": "+44 20 7946 0959",
+    "hire_date": "2022-06-01",
+    "qualifications": [
+      "UEFA Pro License",
+      "FA Level 5 Coaching",
+      "Sports Psychology Certificate"
+    ],
+    "specializations": ["Tactical Analysis", "Player Development", "Team Management"],
+    "squads": [
+      {
+        "squad_id": 1,
+        "squad_name": "First Team",
+        "role": "Head Coach"
+      }
+    ],
+    "last_login": "2024-01-15T07:30:00Z",
+    "created_at": "2022-06-01T10:00:00Z",
+    "updated_at": "2024-01-15T07:30:00Z"
+  },
+  {
+    "id": 2,
+    "username": "s.johnson",
+    "email": "sarah.johnson@medinahfc.com",
+    "firstname": "Sarah",
+    "lastname": "Johnson",
+    "role": "Assistant Coach",
+    "permission_group": "Coaching Staff",
+    "is_active": true,
+    "is_admin": false,
+    "organisation_id": 1,
+    "organisation_name": "Medinah FC",
+    "department": "Coaching",
+    "phone": "+44 20 7946 0960",
+    "emergency_contact": "+44 20 7946 0961",
+    "hire_date": "2022-08-15",
+    "qualifications": [
+      "UEFA A License",
+      "FA Level 4 Coaching",
+      "Fitness Training Certificate"
+    ],
+    "specializations": ["Fitness Training", "Recovery Programs", "Youth Development"],
+    "squads": [
+      {
+        "squad_id": 1,
+        "squad_name": "First Team",
+        "role": "Assistant Coach"
+      }
+    ],
+    "last_login": "2024-01-15T08:00:00Z",
+    "created_at": "2022-08-15T10:00:00Z",
+    "updated_at": "2024-01-15T08:00:00Z"
+  },
+  {
+    "id": 3,
+    "username": "dr.mitchell",
+    "email": "sarah.mitchell@medinahfc.com",
+    "firstname": "Dr. Sarah",
+    "lastname": "Mitchell",
+    "role": "Team Doctor",
+    "permission_group": "Medical Staff",
+    "is_active": true,
+    "is_admin": false,
+    "organisation_id": 1,
+    "organisation_name": "Medinah FC",
+    "department": "Medical",
+    "phone": "+44 20 7946 0962",
+    "emergency_contact": "+44 20 7946 0963",
+    "hire_date": "2021-03-01",
+    "qualifications": [
+      "MBChB Medicine",
+      "Diploma in Sports Medicine",
+      "FFSEM Fellowship"
+    ],
+    "specializations": ["Sports Medicine", "Injury Prevention", "Emergency Care"],
+    "squads": [
+      {
+        "squad_id": 1,
+        "squad_name": "First Team",
+        "role": "Team Doctor"
+      },
+      {
+        "squad_id": 2,
+        "squad_name": "Reserve Team",
+        "role": "Team Doctor"
+      }
+    ],
+    "last_login": "2024-01-14T16:45:00Z",
+    "created_at": "2021-03-01T10:00:00Z",
+    "updated_at": "2024-01-14T16:45:00Z"
+  },
+  {
+    "id": 4,
+    "username": "m.thompson",
+    "email": "michael.thompson@medinahfc.com",
+    "firstname": "Michael",
+    "lastname": "Thompson",
+    "role": "Physiotherapist",
+    "permission_group": "Medical Staff",
+    "is_active": true,
+    "is_admin": false,
+    "organisation_id": 1,
+    "organisation_name": "Medinah FC",
+    "department": "Medical",
+    "phone": "+44 20 7946 0964",
+    "emergency_contact": "+44 20 7946 0965",
+    "hire_date": "2020-09-01",
+    "qualifications": [
+      "BSc Physiotherapy",
+      "MSc Sports Rehabilitation",
+      "ACPSM Membership"
+    ],
+    "specializations": ["Injury Rehabilitation", "Movement Analysis", "Manual Therapy"],
+    "squads": [
+      {
+        "squad_id": 1,
+        "squad_name": "First Team",
+        "role": "Physiotherapist"
+      }
+    ],
+    "last_login": "2024-01-15T09:15:00Z",
+    "created_at": "2020-09-01T10:00:00Z",
+    "updated_at": "2024-01-15T09:15:00Z"
+  },
+  {
+    "id": 5,
+    "username": "m.stevens",
+    "email": "mike.stevens@medinahfc.com",
+    "firstname": "Mike",
+    "lastname": "Stevens",
+    "role": "Strength & Conditioning Coach",
+    "permission_group": "Coaching Staff",
+    "is_active": true,
+    "is_admin": false,
+    "organisation_id": 1,
+    "organisation_name": "Medinah FC",
+    "department": "Performance",
+    "phone": "+44 20 7946 0966",
+    "emergency_contact": "+44 20 7946 0967",
+    "hire_date": "2021-07-01",
+    "qualifications": [
+      "CSCS Certification",
+      "MSc Exercise Science",
+      "UKSCA Accreditation"
+    ],
+    "specializations": ["Strength Training", "Power Development", "Injury Prevention"],
+    "squads": [
+      {
+        "squad_id": 1,
+        "squad_name": "First Team",
+        "role": "S&C Coach"
+      },
+      {
+        "squad_id": 2,
+        "squad_name": "Reserve Team",
+        "role": "S&C Coach"
+      }
+    ],
+    "last_login": "2024-01-15T07:45:00Z",
+    "created_at": "2021-07-01T10:00:00Z",
+    "updated_at": "2024-01-15T07:45:00Z"
+  },
+  {
+    "id": 6,
+    "username": "dr.adams",
+    "email": "jennifer.adams@medinahfc.com",
+    "firstname": "Dr. Jennifer",
+    "lastname": "Adams",
+    "role": "Sports Psychologist",
+    "permission_group": "Medical Staff",
+    "is_active": true,
+    "is_admin": false,
+    "organisation_id": 1,
+    "organisation_name": "Medinah FC",
+    "department": "Psychology",
+    "phone": "+44 20 7946 0968",
+    "emergency_contact": "+44 20 7946 0969",
+    "hire_date": "2022-01-15",
+    "qualifications": [
+      "PhD Psychology",
+      "BPS Chartered Psychologist",
+      "BASES Accredited"
+    ],
+    "specializations": ["Performance Psychology", "Mental Health", "Team Dynamics"],
+    "squads": [
+      {
+        "squad_id": 1,
+        "squad_name": "First Team",
+        "role": "Sports Psychologist"
+      }
+    ],
+    "last_login": "2024-01-14T14:20:00Z",
+    "created_at": "2022-01-15T10:00:00Z",
+    "updated_at": "2024-01-14T14:20:00Z"
+  },
+  {
+    "id": 7,
+    "username": "l.chen",
+    "email": "lisa.chen@medinahfc.com",
+    "firstname": "Lisa",
+    "lastname": "Chen",
+    "role": "Sports Nutritionist",
+    "permission_group": "Medical Staff",
+    "is_active": true,
+    "is_admin": false,
+    "organisation_id": 1,
+    "organisation_name": "Medinah FC",
+    "department": "Nutrition",
+    "phone": "+44 20 7946 0970",
+    "emergency_contact": "+44 20 7946 0971",
+    "hire_date": "2021-11-01",
+    "qualifications": [
+      "MSc Sports Nutrition",
+      "Registered Dietitian",
+      "SENr Accredited"
+    ],
+    "specializations": ["Performance Nutrition", "Recovery Nutrition", "Supplementation"],
+    "squads": [
+      {
+        "squad_id": 1,
+        "squad_name": "First Team",
+        "role": "Nutritionist"
+      },
+      {
+        "squad_id": 2,
+        "squad_name": "Reserve Team",
+        "role": "Nutritionist"
+      }
+    ],
+    "last_login": "2024-01-15T11:30:00Z",
+    "created_at": "2021-11-01T10:00:00Z",
+    "updated_at": "2024-01-15T11:30:00Z"
+  },
+  {
+    "id": 8,
+    "username": "j.parker",
+    "email": "james.parker@medinahfc.com",
+    "firstname": "James",
+    "lastname": "Parker",
+    "role": "Performance Analyst",
+    "permission_group": "Analysis Staff",
+    "is_active": true,
+    "is_admin": false,
+    "organisation_id": 1,
+    "organisation_name": "Medinah FC",
+    "department": "Analysis",
+    "phone": "+44 20 7946 0972",
+    "emergency_contact": "+44 20 7946 0973",
+    "hire_date": "2022-03-01",
+    "qualifications": [
+      "BSc Sports Science",
+      "MSc Performance Analysis",
+      "ISPAS Certified"
+    ],
+    "specializations": ["Match Analysis", "Player Tracking", "Data Analytics"],
+    "squads": [
+      {
+        "squad_id": 1,
+        "squad_name": "First Team",
+        "role": "Performance Analyst"
+      }
+    ],
+    "last_login": "2024-01-15T10:00:00Z",
+    "created_at": "2022-03-01T10:00:00Z",
+    "updated_at": "2024-01-15T10:00:00Z"
+  },
+  {
+    "id": 9,
+    "username": "admin",
+    "email": "admin@medinahfc.com",
+    "firstname": "System",
+    "lastname": "Administrator",
+    "role": "System Admin",
+    "permission_group": "Administrators",
+    "is_active": true,
+    "is_admin": true,
+    "organisation_id": 1,
+    "organisation_name": "Medinah FC",
+    "department": "IT",
+    "phone": "+44 20 7946 0974",
+    "emergency_contact": "+44 20 7946 0975",
+    "hire_date": "2020-01-01",
+    "qualifications": [
+      "BSc Computer Science",
+      "Systems Administration",
+      "Database Management"
+    ],
+    "specializations": ["System Management", "Database Administration", "Security"],
+    "squads": [],
+    "last_login": "2024-01-15T08:00:00Z",
+    "created_at": "2020-01-01T10:00:00Z",
+    "updated_at": "2024-01-15T08:00:00Z"
+  },
+  {
+    "id": 10,
+    "username": "a.thompson",
+    "email": "alex.thompson@medinahfc.com",
+    "firstname": "Alex",
+    "lastname": "Thompson",
+    "role": "Reserve Team Coach",
+    "permission_group": "Coaching Staff",
+    "is_active": true,
+    "is_admin": false,
+    "organisation_id": 1,
+    "organisation_name": "Medinah FC",
+    "department": "Coaching",
+    "phone": "+44 20 7946 0976",
+    "emergency_contact": "+44 20 7946 0977",
+    "hire_date": "2023-01-01",
+    "qualifications": [
+      "UEFA B License",
+      "FA Level 3 Coaching",
+      "Youth Development"
+    ],
+    "specializations": ["Youth Development", "Player Pathways", "Tactical Training"],
+    "squads": [
+      {
+        "squad_id": 2,
+        "squad_name": "Reserve Team",
+        "role": "Head Coach"
+      }
+    ],
+    "last_login": "2024-01-15T09:30:00Z",
+    "created_at": "2023-01-01T10:00:00Z",
+    "updated_at": "2024-01-15T09:30:00Z"
+  }
+]

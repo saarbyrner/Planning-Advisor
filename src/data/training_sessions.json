@@ -1,0 +1,297 @@
+[
+  {
+    "id": 1,
+    "date": "2024-01-15",
+    "session_type": "Strength Training",
+    "duration": 90,
+    "squad_id": 1,
+    "squad_name": "First Team",
+    "organisation_id": 1,
+    "intensity": "High",
+    "workload_type": "Resistance",
+    "average_workload": 7.2,
+    "status": "Completed",
+    "attendance": 18,
+    "max_attendance": 20,
+    "location": "Gym A",
+    "coach": "Mike Stevens",
+    "session_rpe": 8.1,
+    "weather_condition": "Indoor",
+    "surface_type": "Gym Floor",
+    "game_day_plus": 3,
+    "game_day_minus": 4,
+    "exercises": [
+      {
+        "name": "Back Squat",
+        "sets": 4,
+        "reps": 8,
+        "weight": "80-85kg",
+        "rest": "90s"
+      },
+      {
+        "name": "Bench Press",
+        "sets": 3,
+        "reps": 10,
+        "weight": "70-75kg",
+        "rest": "60s"
+      },
+      {
+        "name": "Deadlift",
+        "sets": 3,
+        "reps": 6,
+        "weight": "90-95kg",
+        "rest": "120s"
+      },
+      {
+        "name": "Pull-ups",
+        "sets": 3,
+        "reps": 12,
+        "weight": "Bodyweight",
+        "rest": "45s"
+      }
+    ],
+    "notes": "Good session overall. Athletes showed improvement in squat depth.",
+    "created_at": "2024-01-15T08:00:00Z",
+    "updated_at": "2024-01-15T10:30:00Z"
+  },
+  {
+    "id": 2,
+    "date": "2024-01-14",
+    "session_type": "Cardio Training",
+    "duration": 60,
+    "squad_id": 1,
+    "squad_name": "First Team",
+    "organisation_id": 1,
+    "intensity": "Medium",
+    "workload_type": "Aerobic",
+    "average_workload": 6.8,
+    "status": "Completed",
+    "attendance": 20,
+    "max_attendance": 20,
+    "location": "Training Field 1",
+    "coach": "Sarah Johnson",
+    "session_rpe": 6.9,
+    "weather_condition": "Cloudy",
+    "surface_type": "Natural Grass",
+    "game_day_plus": 2,
+    "game_day_minus": 5,
+    "exercises": [
+      {
+        "name": "Interval Running",
+        "duration": "30 minutes",
+        "distance": "5km",
+        "pace": "6:00/km average",
+        "intervals": "8 x 400m"
+      },
+      {
+        "name": "Cycling",
+        "duration": "20 minutes",
+        "distance": "8km",
+        "resistance": "Medium",
+        "cadence": "80 rpm"
+      },
+      {
+        "name": "Cool-down Jog",
+        "duration": "10 minutes",
+        "distance": "1.5km",
+        "pace": "8:00/km",
+        "intensity": "Easy"
+      }
+    ],
+    "notes": "Excellent attendance. Weather conditions good for outdoor training.",
+    "created_at": "2024-01-14T09:30:00Z",
+    "updated_at": "2024-01-14T11:00:00Z"
+  },
+  {
+    "id": 3,
+    "date": "2024-01-13",
+    "session_type": "Technical Skills",
+    "duration": 105,
+    "squad_id": 1,
+    "squad_name": "First Team",
+    "organisation_id": 1,
+    "intensity": "Medium",
+    "workload_type": "Technical",
+    "average_workload": 5.9,
+    "status": "Completed",
+    "attendance": 19,
+    "max_attendance": 20,
+    "location": "Training Field 2",
+    "coach": "Roberto Martinez",
+    "session_rpe": 6.2,
+    "weather_condition": "Sunny",
+    "surface_type": "Artificial Turf",
+    "game_day_plus": 1,
+    "game_day_minus": 6,
+    "exercises": [
+      {
+        "name": "Passing Drills",
+        "duration": "30 minutes",
+        "focus": "Short passing accuracy",
+        "success_rate": "85%"
+      },
+      {
+        "name": "Shooting Practice",
+        "duration": "25 minutes",
+        "focus": "Finishing in the box",
+        "goals_scored": "45/60 shots"
+      },
+      {
+        "name": "Ball Control",
+        "duration": "20 minutes",
+        "focus": "First touch under pressure",
+        "repetitions": "200 touches"
+      },
+      {
+        "name": "Small-sided Games",
+        "duration": "30 minutes",
+        "format": "7v7",
+        "focus": "Quick decision making"
+      }
+    ],
+    "notes": "Good technical session. Focus on first touch showing improvement.",
+    "created_at": "2024-01-13T10:00:00Z",
+    "updated_at": "2024-01-13T12:45:00Z"
+  },
+  {
+    "id": 4,
+    "date": "2024-01-12",
+    "session_type": "Recovery",
+    "duration": 45,
+    "squad_id": 1,
+    "squad_name": "First Team",
+    "organisation_id": 1,
+    "intensity": "Low",
+    "workload_type": "Recovery",
+    "average_workload": 3.2,
+    "status": "Completed",
+    "attendance": 16,
+    "max_attendance": 20,
+    "location": "Recovery Center",
+    "coach": "Dr. Emma Wilson",
+    "session_rpe": 3.8,
+    "weather_condition": "Indoor",
+    "surface_type": "Mats",
+    "game_day_plus": 0,
+    "game_day_minus": 7,
+    "exercises": [
+      {
+        "name": "Dynamic Stretching",
+        "duration": "15 minutes",
+        "focus": "Hip mobility and flexibility"
+      },
+      {
+        "name": "Foam Rolling",
+        "duration": "10 minutes",
+        "focus": "Muscle tension release"
+      },
+      {
+        "name": "Pool Recovery",
+        "duration": "15 minutes",
+        "focus": "Light swimming and water walking"
+      },
+      {
+        "name": "Meditation",
+        "duration": "5 minutes",
+        "focus": "Mental recovery and relaxation"
+      }
+    ],
+    "notes": "Optional session. Good participation considering game day yesterday.",
+    "created_at": "2024-01-12T14:00:00Z",
+    "updated_at": "2024-01-12T15:15:00Z"
+  },
+  {
+    "id": 5,
+    "date": "2024-01-11",
+    "session_type": "Match Preparation",
+    "duration": 90,
+    "squad_id": 1,
+    "squad_name": "First Team",
+    "organisation_id": 1,
+    "intensity": "High",
+    "workload_type": "Tactical",
+    "average_workload": 7.8,
+    "status": "Completed",
+    "attendance": 20,
+    "max_attendance": 20,
+    "location": "Main Stadium",
+    "coach": "Roberto Martinez",
+    "session_rpe": 7.5,
+    "weather_condition": "Overcast",
+    "surface_type": "Natural Grass",
+    "game_day_plus": -1,
+    "game_day_minus": 0,
+    "exercises": [
+      {
+        "name": "Tactical Walkthrough",
+        "duration": "20 minutes",
+        "focus": "Formation and positioning"
+      },
+      {
+        "name": "Set Pieces",
+        "duration": "25 minutes",
+        "focus": "Corners and free kicks"
+      },
+      {
+        "name": "Finishing Practice",
+        "duration": "20 minutes",
+        "focus": "Clinical finishing under pressure"
+      },
+      {
+        "name": "Opposition Analysis",
+        "duration": "15 minutes",
+        "focus": "Key player threats and weaknesses"
+      },
+      {
+        "name": "Activation Warm-up",
+        "duration": "10 minutes",
+        "focus": "Match readiness preparation"
+      }
+    ],
+    "notes": "Final preparation before match. Team looking sharp and focused.",
+    "created_at": "2024-01-11T10:30:00Z",
+    "updated_at": "2024-01-11T12:00:00Z"
+  },
+  {
+    "id": 6,
+    "date": "2024-01-10",
+    "session_type": "Tactical Training",
+    "duration": 75,
+    "squad_id": 2,
+    "squad_name": "Reserve Team",
+    "organisation_id": 1,
+    "intensity": "Medium",
+    "workload_type": "Tactical",
+    "average_workload": 6.1,
+    "status": "Completed",
+    "attendance": 14,
+    "max_attendance": 16,
+    "location": "Training Field 3",
+    "coach": "Alex Thompson",
+    "session_rpe": 6.4,
+    "weather_condition": "Light Rain",
+    "surface_type": "Artificial Turf",
+    "game_day_plus": 5,
+    "game_day_minus": 2,
+    "exercises": [
+      {
+        "name": "Pressing Triggers",
+        "duration": "25 minutes",
+        "focus": "When and how to press"
+      },
+      {
+        "name": "Possession Play",
+        "duration": "30 minutes",
+        "focus": "Building from the back"
+      },
+      {
+        "name": "Transition Game",
+        "duration": "20 minutes",
+        "focus": "Quick switches of play"
+      }
+    ],
+    "notes": "Good intensity despite weather. Reserve team showing tactical understanding.",
+    "created_at": "2024-01-10T16:00:00Z",
+    "updated_at": "2024-01-10T17:15:00Z"
+  }
+]

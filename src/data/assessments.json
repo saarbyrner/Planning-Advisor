@@ -1,0 +1,326 @@
+[
+  {
+    "id": 1,
+    "athlete_id": 1,
+    "athlete_name": "Marcus Johnson",
+    "assessment_type": "Fitness Assessment",
+    "assessment_template": "Pre-Season Fitness Battery",
+    "assessment_date": "2024-01-15",
+    "assessor": "Dr. Sarah Mitchell",
+    "status": "Completed",
+    "overall_score": 85,
+    "max_score": 100,
+    "assessment_items": [
+      {
+        "metric": "VO2 Max",
+        "value": 58.2,
+        "unit": "ml/kg/min",
+        "percentile": 88,
+        "status": "Excellent"
+      },
+      {
+        "metric": "Sprint Speed (40m)",
+        "value": 4.82,
+        "unit": "seconds",
+        "percentile": 82,
+        "status": "Very Good"
+      },
+      {
+        "metric": "Vertical Jump",
+        "value": 68,
+        "unit": "cm",
+        "percentile": 85,
+        "status": "Excellent"
+      },
+      {
+        "metric": "Flexibility (Sit-Reach)",
+        "value": 28,
+        "unit": "cm",
+        "percentile": 78,
+        "status": "Good"
+      },
+      {
+        "metric": "Body Fat Percentage",
+        "value": 8.2,
+        "unit": "%",
+        "percentile": 92,
+        "status": "Excellent"
+      }
+    ],
+    "notes": "Excellent overall fitness. Slight improvement needed in flexibility.",
+    "recommendations": "Focus on hamstring and hip flexor stretching routine.",
+    "next_assessment": "2024-04-15",
+    "created_at": "2024-01-15T09:00:00Z",
+    "updated_at": "2024-01-15T11:30:00Z"
+  },
+  {
+    "id": 2,
+    "athlete_id": 2,
+    "athlete_name": "Elena Rodriguez",
+    "assessment_type": "Medical Screening",
+    "assessment_template": "Comprehensive Health Check",
+    "assessment_date": "2024-01-12",
+    "assessor": "Dr. Michael Thompson",
+    "status": "Completed",
+    "overall_score": 92,
+    "max_score": 100,
+    "assessment_items": [
+      {
+        "metric": "Blood Pressure",
+        "value": "118/76",
+        "unit": "mmHg",
+        "percentile": 95,
+        "status": "Excellent"
+      },
+      {
+        "metric": "Resting Heart Rate",
+        "value": 52,
+        "unit": "bpm",
+        "percentile": 88,
+        "status": "Excellent"
+      },
+      {
+        "metric": "Lung Capacity (FEV1)",
+        "value": 3.8,
+        "unit": "L",
+        "percentile": 92,
+        "status": "Excellent"
+      },
+      {
+        "metric": "Cholesterol (Total)",
+        "value": 165,
+        "unit": "mg/dL",
+        "percentile": 90,
+        "status": "Excellent"
+      },
+      {
+        "metric": "Iron Levels",
+        "value": 14.2,
+        "unit": "μg/dL",
+        "percentile": 85,
+        "status": "Good"
+      }
+    ],
+    "notes": "All medical parameters within excellent range. Minor iron deficiency noted.",
+    "recommendations": "Include iron-rich foods in diet. Monitor knee injury recovery.",
+    "next_assessment": "2024-07-12",
+    "created_at": "2024-01-12T14:00:00Z",
+    "updated_at": "2024-01-12T16:45:00Z"
+  },
+  {
+    "id": 3,
+    "athlete_id": 3,
+    "athlete_name": "David Chen",
+    "assessment_type": "Skill Assessment",
+    "assessment_template": "Technical Skills Evaluation",
+    "assessment_date": "2024-01-10",
+    "assessor": "Roberto Martinez",
+    "status": "Completed",
+    "overall_score": 78,
+    "max_score": 100,
+    "assessment_items": [
+      {
+        "metric": "Passing Accuracy",
+        "value": 87,
+        "unit": "%",
+        "percentile": 82,
+        "status": "Very Good"
+      },
+      {
+        "metric": "Ball Control",
+        "value": 8.2,
+        "unit": "/10",
+        "percentile": 75,
+        "status": "Good"
+      },
+      {
+        "metric": "Defensive Positioning",
+        "value": 8.8,
+        "unit": "/10",
+        "percentile": 88,
+        "status": "Excellent"
+      },
+      {
+        "metric": "Heading Accuracy",
+        "value": 72,
+        "unit": "%",
+        "percentile": 70,
+        "status": "Good"
+      },
+      {
+        "metric": "Crossing Ability",
+        "value": 6.5,
+        "unit": "/10",
+        "percentile": 65,
+        "status": "Average"
+      }
+    ],
+    "notes": "Strong defensive skills. Room for improvement in attacking play.",
+    "recommendations": "Focus on crossing technique and offensive positioning drills.",
+    "next_assessment": "2024-03-10",
+    "created_at": "2024-01-10T10:30:00Z",
+    "updated_at": "2024-01-10T12:15:00Z"
+  },
+  {
+    "id": 4,
+    "athlete_id": 4,
+    "athlete_name": "Sarah Williams",
+    "assessment_type": "Goalkeeper Assessment",
+    "assessment_template": "Goalkeeper Skills Battery",
+    "assessment_date": "2024-01-08",
+    "assessor": "Emma Foster",
+    "status": "Completed",
+    "overall_score": 88,
+    "max_score": 100,
+    "assessment_items": [
+      {
+        "metric": "Reaction Time",
+        "value": 0.18,
+        "unit": "seconds",
+        "percentile": 95,
+        "status": "Excellent"
+      },
+      {
+        "metric": "Shot Stopping",
+        "value": 82,
+        "unit": "%",
+        "percentile": 85,
+        "status": "Very Good"
+      },
+      {
+        "metric": "Distribution Accuracy",
+        "value": 78,
+        "unit": "%",
+        "percentile": 82,
+        "status": "Very Good"
+      },
+      {
+        "metric": "Positioning",
+        "value": 9.1,
+        "unit": "/10",
+        "percentile": 90,
+        "status": "Excellent"
+      },
+      {
+        "metric": "Communication",
+        "value": 8.8,
+        "unit": "/10",
+        "percentile": 88,
+        "status": "Excellent"
+      }
+    ],
+    "notes": "Exceptional reflexes and positioning. Leadership qualities evident.",
+    "recommendations": "Continue working on distribution under pressure situations.",
+    "next_assessment": "2024-04-08",
+    "created_at": "2024-01-08T11:00:00Z",
+    "updated_at": "2024-01-08T13:30:00Z"
+  },
+  {
+    "id": 5,
+    "athlete_id": 5,
+    "athlete_name": "Alex Thompson",
+    "assessment_type": "Psychological Assessment",
+    "assessment_template": "Mental Performance Evaluation",
+    "assessment_date": "2024-01-05",
+    "assessor": "Dr. Jennifer Adams",
+    "status": "Completed",
+    "overall_score": 73,
+    "max_score": 100,
+    "assessment_items": [
+      {
+        "metric": "Stress Management",
+        "value": 7.2,
+        "unit": "/10",
+        "percentile": 72,
+        "status": "Good"
+      },
+      {
+        "metric": "Motivation Level",
+        "value": 8.1,
+        "unit": "/10",
+        "percentile": 81,
+        "status": "Very Good"
+      },
+      {
+        "metric": "Concentration",
+        "value": 6.8,
+        "unit": "/10",
+        "percentile": 68,
+        "status": "Average"
+      },
+      {
+        "metric": "Confidence",
+        "value": 7.8,
+        "unit": "/10",
+        "percentile": 78,
+        "status": "Good"
+      },
+      {
+        "metric": "Team Cohesion",
+        "value": 8.5,
+        "unit": "/10",
+        "percentile": 85,
+        "status": "Very Good"
+      }
+    ],
+    "notes": "Good mental resilience. Concentration could be improved for match situations.",
+    "recommendations": "Implement mindfulness training and concentration exercises.",
+    "next_assessment": "2024-04-05",
+    "created_at": "2024-01-05T15:00:00Z",
+    "updated_at": "2024-01-05T16:30:00Z"
+  },
+  {
+    "id": 6,
+    "athlete_id": 6,
+    "athlete_name": "Emma Davis",
+    "assessment_type": "Nutrition Assessment",
+    "assessment_template": "Dietary Analysis",
+    "assessment_date": "2024-01-03",
+    "assessor": "Lisa Chen",
+    "status": "Completed",
+    "overall_score": 81,
+    "max_score": 100,
+    "assessment_items": [
+      {
+        "metric": "Caloric Intake",
+        "value": 2850,
+        "unit": "kcal/day",
+        "percentile": 85,
+        "status": "Very Good"
+      },
+      {
+        "metric": "Protein Intake",
+        "value": 1.8,
+        "unit": "g/kg body weight",
+        "percentile": 80,
+        "status": "Good"
+      },
+      {
+        "metric": "Carbohydrate Timing",
+        "value": 8.2,
+        "unit": "/10",
+        "percentile": 82,
+        "status": "Very Good"
+      },
+      {
+        "metric": "Hydration Status",
+        "value": 7.5,
+        "unit": "/10",
+        "percentile": 75,
+        "status": "Good"
+      },
+      {
+        "metric": "Micronutrient Balance",
+        "value": 8.8,
+        "unit": "/10",
+        "percentile": 88,
+        "status": "Excellent"
+      }
+    ],
+    "notes": "Good nutritional habits overall. Hydration could be optimized.",
+    "recommendations": "Increase fluid intake during training sessions. Monitor electrolyte balance.",
+    "next_assessment": "2024-04-03",
+    "created_at": "2024-01-03T13:00:00Z",
+    "updated_at": "2024-01-03T14:45:00Z"
+  }
+]

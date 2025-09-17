@@ -1,0 +1,10 @@
+{
+  "name": "stylelint-plugin-design-system",
+  "version": "1.0.0", 
+  "description": "Stylelint plugin for design system compliance",
+  "main": "index.js",
+  "keywords": ["stylelint", "stylelint-plugin", "design-system"],
+  "peerDependencies": {
+    "stylelint": ">=14.0.0"
+  }
+}

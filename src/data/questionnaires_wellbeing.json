@@ -1,0 +1,357 @@
+[
+  {
+    "id": 1,
+    "athlete_id": 1,
+    "athlete_name": "Marcus Johnson",
+    "questionnaire_type": "Daily Wellbeing",
+    "questionnaire_date": "2024-01-15",
+    "status": "Completed",
+    "completion_time": "2024-01-15T08:30:00Z",
+    "responses": [
+      {
+        "question": "How did you sleep last night?",
+        "variable": "sleep_quality",
+        "response": 8,
+        "scale": "1-10",
+        "category": "Sleep"
+      },
+      {
+        "question": "How are your energy levels?",
+        "variable": "energy_level",
+        "response": 7,
+        "scale": "1-10",
+        "category": "Energy"
+      },
+      {
+        "question": "Any muscle soreness?",
+        "variable": "muscle_soreness",
+        "response": 4,
+        "scale": "1-10",
+        "category": "Physical"
+      },
+      {
+        "question": "How is your mood today?",
+        "variable": "mood",
+        "response": 8,
+        "scale": "1-10",
+        "category": "Psychological"
+      },
+      {
+        "question": "Stress levels?",
+        "variable": "stress",
+        "response": 3,
+        "scale": "1-10",
+        "category": "Psychological"
+      },
+      {
+        "question": "Appetite normal?",
+        "variable": "appetite",
+        "response": "Yes",
+        "scale": "Yes/No",
+        "category": "Nutrition"
+      },
+      {
+        "question": "Hours of sleep",
+        "variable": "sleep_hours",
+        "response": 8.5,
+        "scale": "Hours",
+        "category": "Sleep"
+      }
+    ],
+    "overall_score": 7.8,
+    "wellness_flags": [],
+    "recommendations": "Good overall wellness. Continue current recovery routine.",
+    "created_at": "2024-01-15T08:30:00Z",
+    "updated_at": "2024-01-15T08:35:00Z"
+  },
+  {
+    "id": 2,
+    "athlete_id": 2,
+    "athlete_name": "Elena Rodriguez",
+    "questionnaire_type": "Injury Recovery",
+    "questionnaire_date": "2024-01-14",
+    "status": "Completed",
+    "completion_time": "2024-01-14T10:15:00Z",
+    "responses": [
+      {
+        "question": "Pain level in injured area",
+        "variable": "pain_level",
+        "response": 3,
+        "scale": "1-10",
+        "category": "Pain"
+      },
+      {
+        "question": "Range of motion improvement",
+        "variable": "rom_improvement",
+        "response": 7,
+        "scale": "1-10",
+        "category": "Physical"
+      },
+      {
+        "question": "Confidence in injured area",
+        "variable": "confidence",
+        "response": 6,
+        "scale": "1-10",
+        "category": "Psychological"
+      },
+      {
+        "question": "Swelling present?",
+        "variable": "swelling",
+        "response": "Mild",
+        "scale": "None/Mild/Moderate/Severe",
+        "category": "Physical"
+      },
+      {
+        "question": "Treatment effectiveness",
+        "variable": "treatment_effectiveness",
+        "response": 8,
+        "scale": "1-10",
+        "category": "Treatment"
+      },
+      {
+        "question": "Sleep quality affected by injury?",
+        "variable": "sleep_affected",
+        "response": "Slightly",
+        "scale": "Not at all/Slightly/Moderately/Severely",
+        "category": "Sleep"
+      }
+    ],
+    "overall_score": 6.2,
+    "wellness_flags": ["Low confidence", "Mild swelling"],
+    "recommendations": "Continue physiotherapy. Monitor confidence levels. Consider psychological support.",
+    "created_at": "2024-01-14T10:15:00Z",
+    "updated_at": "2024-01-14T10:20:00Z"
+  },
+  {
+    "id": 3,
+    "athlete_id": 3,
+    "athlete_name": "David Chen",
+    "questionnaire_type": "Pre-Training",
+    "questionnaire_date": "2024-01-13",
+    "status": "Completed",
+    "completion_time": "2024-01-13T09:00:00Z",
+    "responses": [
+      {
+        "question": "Readiness to train",
+        "variable": "training_readiness",
+        "response": 9,
+        "scale": "1-10",
+        "category": "Readiness"
+      },
+      {
+        "question": "Fatigue level",
+        "variable": "fatigue",
+        "response": 2,
+        "scale": "1-10",
+        "category": "Physical"
+      },
+      {
+        "question": "Motivation for training",
+        "variable": "motivation",
+        "response": 9,
+        "scale": "1-10",
+        "category": "Psychological"
+      },
+      {
+        "question": "Any injuries or pain?",
+        "variable": "injuries_pain",
+        "response": "No",
+        "scale": "Yes/No",
+        "category": "Physical"
+      },
+      {
+        "question": "Hydration status",
+        "variable": "hydration",
+        "response": "Good",
+        "scale": "Poor/Fair/Good/Excellent",
+        "category": "Nutrition"
+      },
+      {
+        "question": "Last meal timing",
+        "variable": "last_meal",
+        "response": "2 hours ago",
+        "scale": "Time",
+        "category": "Nutrition"
+      }
+    ],
+    "overall_score": 8.9,
+    "wellness_flags": [],
+    "recommendations": "Excellent readiness for training. Maintain current preparation routine.",
+    "created_at": "2024-01-13T09:00:00Z",
+    "updated_at": "2024-01-13T09:05:00Z"
+  },
+  {
+    "id": 4,
+    "athlete_id": 4,
+    "athlete_name": "Sarah Williams",
+    "questionnaire_type": "Match Day",
+    "questionnaire_date": "2024-01-12",
+    "status": "Completed",
+    "completion_time": "2024-01-12T13:00:00Z",
+    "responses": [
+      {
+        "question": "Pre-match nerves",
+        "variable": "nerves",
+        "response": 4,
+        "scale": "1-10",
+        "category": "Psychological"
+      },
+      {
+        "question": "Confidence level",
+        "variable": "confidence",
+        "response": 9,
+        "scale": "1-10",
+        "category": "Psychological"
+      },
+      {
+        "question": "Physical readiness",
+        "variable": "physical_readiness",
+        "response": 9,
+        "scale": "1-10",
+        "category": "Physical"
+      },
+      {
+        "question": "Focus level",
+        "variable": "focus",
+        "response": 8,
+        "scale": "1-10",
+        "category": "Psychological"
+      },
+      {
+        "question": "Team chemistry feeling",
+        "variable": "team_chemistry",
+        "response": 9,
+        "scale": "1-10",
+        "category": "Team"
+      },
+      {
+        "question": "Tactical preparation",
+        "variable": "tactical_prep",
+        "response": 8,
+        "scale": "1-10",
+        "category": "Tactical"
+      }
+    ],
+    "overall_score": 8.2,
+    "wellness_flags": [],
+    "recommendations": "Excellent match readiness. Good confidence and physical state.",
+    "created_at": "2024-01-12T13:00:00Z",
+    "updated_at": "2024-01-12T13:05:00Z"
+  },
+  {
+    "id": 5,
+    "athlete_id": 5,
+    "athlete_name": "Alex Thompson",
+    "questionnaire_type": "Post-Match",
+    "questionnaire_date": "2024-01-05",
+    "status": "Completed",
+    "completion_time": "2024-01-05T22:30:00Z",
+    "responses": [
+      {
+        "question": "Overall match performance satisfaction",
+        "variable": "performance_satisfaction",
+        "response": 7,
+        "scale": "1-10",
+        "category": "Performance"
+      },
+      {
+        "question": "Physical exertion level",
+        "variable": "exertion",
+        "response": 8,
+        "scale": "1-10",
+        "category": "Physical"
+      },
+      {
+        "question": "Recovery needs",
+        "variable": "recovery_needs",
+        "response": 6,
+        "scale": "1-10",
+        "category": "Recovery"
+      },
+      {
+        "question": "Any new injuries or pain?",
+        "variable": "new_injuries",
+        "response": "No",
+        "scale": "Yes/No",
+        "category": "Physical"
+      },
+      {
+        "question": "Team performance satisfaction",
+        "variable": "team_performance",
+        "response": 6,
+        "scale": "1-10",
+        "category": "Team"
+      },
+      {
+        "question": "Mental state post-match",
+        "variable": "mental_state",
+        "response": 7,
+        "scale": "1-10",
+        "category": "Psychological"
+      }
+    ],
+    "overall_score": 6.8,
+    "wellness_flags": ["Moderate recovery needs"],
+    "recommendations": "Good performance. Focus on recovery protocols for next training session.",
+    "created_at": "2024-01-05T22:30:00Z",
+    "updated_at": "2024-01-05T22:35:00Z"
+  },
+  {
+    "id": 6,
+    "athlete_id": 6,
+    "athlete_name": "Emma Davis",
+    "questionnaire_type": "Nutrition Check",
+    "questionnaire_date": "2024-01-10",
+    "status": "Completed",
+    "completion_time": "2024-01-10T18:00:00Z",
+    "responses": [
+      {
+        "question": "Meals eaten today",
+        "variable": "meals_count",
+        "response": 5,
+        "scale": "Number",
+        "category": "Nutrition"
+      },
+      {
+        "question": "Water intake (liters)",
+        "variable": "water_intake",
+        "response": 2.8,
+        "scale": "Liters",
+        "category": "Hydration"
+      },
+      {
+        "question": "Energy levels throughout day",
+        "variable": "energy_stability",
+        "response": 8,
+        "scale": "1-10",
+        "category": "Energy"
+      },
+      {
+        "question": "Cravings experienced",
+        "variable": "cravings",
+        "response": "Sweet foods",
+        "scale": "Text",
+        "category": "Nutrition"
+      },
+      {
+        "question": "Supplement compliance",
+        "variable": "supplement_compliance",
+        "response": "Yes",
+        "scale": "Yes/No",
+        "category": "Supplements"
+      },
+      {
+        "question": "Digestive comfort",
+        "variable": "digestive_comfort",
+        "response": 8,
+        "scale": "1-10",
+        "category": "Digestion"
+      }
+    ],
+    "overall_score": 7.9,
+    "wellness_flags": ["Low water intake", "Sweet cravings"],
+    "recommendations": "Increase water intake. Address sweet cravings with balanced snacks.",
+    "created_at": "2024-01-10T18:00:00Z",
+    "updated_at": "2024-01-10T18:05:00Z"
+  }
+]

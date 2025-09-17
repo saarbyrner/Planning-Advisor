@@ -1,0 +1,278 @@
+[
+  {
+    "id": 1,
+    "name": "First Team",
+    "sport": "Football",
+    "division": "Premier League",
+    "organisation_id": 1,
+    "organisation_name": "Medinah FC",
+    "is_active": true,
+    "is_locked": false,
+    "parent_squad_id": null,
+    "squad_type": "Senior",
+    "season": "2023-24",
+    "coach": "Roberto Martinez",
+    "assistant_coach": "Sarah Johnson",
+    "captain": "James Wilson",
+    "vice_captain": "Elena Rodriguez",
+    "formation": "4-3-3",
+    "home_venue": "Home Stadium",
+    "training_ground": "Training Center A",
+    "squad_size": 25,
+    "active_players": 20,
+    "injured_players": 2,
+    "suspended_players": 0,
+    "stats": {
+      "matches_played": 18,
+      "wins": 11,
+      "draws": 4,
+      "losses": 3,
+      "goals_for": 34,
+      "goals_against": 18,
+      "points": 37,
+      "league_position": 4
+    },
+    "players": [
+      {
+        "athlete_id": 1,
+        "name": "Marcus Johnson",
+        "position": "Forward",
+        "jersey_number": 9,
+        "status": "Active"
+      },
+      {
+        "athlete_id": 2,
+        "name": "Elena Rodriguez",
+        "position": "Midfielder",
+        "jersey_number": 8,
+        "status": "Injured"
+      },
+      {
+        "athlete_id": 3,
+        "name": "David Chen",
+        "position": "Defender",
+        "jersey_number": 5,
+        "status": "Active"
+      },
+      {
+        "athlete_id": 4,
+        "name": "Sarah Williams",
+        "position": "Goalkeeper",
+        "jersey_number": 1,
+        "status": "Active"
+      },
+      {
+        "athlete_id": 6,
+        "name": "Emma Davis",
+        "position": "Midfielder",
+        "jersey_number": 10,
+        "status": "Active"
+      },
+      {
+        "athlete_id": 7,
+        "name": "James Wilson",
+        "position": "Defender",
+        "jersey_number": 4,
+        "status": "Active"
+      }
+    ],
+    "recent_form": ["W", "W", "D", "L", "W"],
+    "next_match": {
+      "date": "2024-01-18",
+      "opponent": "Liverpool FC",
+      "opponent_logo": "liverpool",
+      "venue": "Away",
+      "competition": "Premier League"
+    },
+    "logo": "arsenal",
+    "league": "premier-league",
+    "created_at": "2023-07-01T10:00:00Z",
+    "updated_at": "2024-01-15T14:30:00Z"
+  },
+  {
+    "id": 2,
+    "name": "Reserve Team",
+    "sport": "Football",
+    "division": "Championship",
+    "organisation_id": 1,
+    "organisation_name": "Medinah FC",
+    "is_active": true,
+    "is_locked": false,
+    "parent_squad_id": 1,
+    "squad_type": "Reserve",
+    "season": "2023-24",
+    "coach": "Alex Thompson",
+    "assistant_coach": "Mike Stevens",
+    "captain": "Alex Thompson",
+    "vice_captain": "Maria Santos",
+    "formation": "4-4-2",
+    "home_venue": "Training Ground Stadium",
+    "training_ground": "Training Center B",
+    "squad_size": 20,
+    "active_players": 16,
+    "injured_players": 1,
+    "suspended_players": 0,
+    "stats": {
+      "matches_played": 15,
+      "wins": 8,
+      "draws": 5,
+      "losses": 2,
+      "goals_for": 28,
+      "goals_against": 15,
+      "points": 29,
+      "league_position": 6
+    },
+    "players": [
+      {
+        "athlete_id": 5,
+        "name": "Alex Thompson",
+        "position": "Forward",
+        "jersey_number": 11,
+        "status": "Active"
+      },
+      {
+        "athlete_id": 8,
+        "name": "Maria Santos",
+        "position": "Forward",
+        "jersey_number": 7,
+        "status": "Active"
+      }
+    ],
+    "recent_form": ["W", "D", "W", "W", "D"],
+    "next_match": {
+      "date": "2024-01-16",
+      "opponent": "Brighton Reserves",
+      "opponent_logo": "brighton",
+      "venue": "Home",
+      "competition": "Reserve League"
+    },
+    "logo": "chelsea",
+    "league": "premier-league",
+    "created_at": "2023-07-01T10:00:00Z",
+    "updated_at": "2024-01-15T14:30:00Z"
+  },
+  {
+    "id": 3,
+    "name": "Youth Team",
+    "sport": "Football",
+    "division": "Youth League",
+    "organisation_id": 1,
+    "organisation_name": "Medinah FC",
+    "is_active": true,
+    "is_locked": false,
+    "parent_squad_id": 1,
+    "squad_type": "Youth",
+    "season": "2023-24",
+    "coach": "Tom Mitchell",
+    "assistant_coach": "Jenny Adams",
+    "captain": "Ryan Murphy",
+    "vice_captain": "Sophie Clarke",
+    "formation": "4-2-3-1",
+    "home_venue": "Academy Stadium",
+    "training_ground": "Youth Academy",
+    "squad_size": 18,
+    "active_players": 18,
+    "injured_players": 0,
+    "suspended_players": 0,
+    "stats": {
+      "matches_played": 12,
+      "wins": 9,
+      "draws": 2,
+      "losses": 1,
+      "goals_for": 31,
+      "goals_against": 12,
+      "points": 29,
+      "league_position": 2
+    },
+    "players": [
+      {
+        "athlete_id": 9,
+        "name": "Ryan Murphy",
+        "position": "Midfielder",
+        "jersey_number": 6,
+        "status": "Active"
+      },
+      {
+        "athlete_id": 10,
+        "name": "Sophie Clarke",
+        "position": "Defender",
+        "jersey_number": 3,
+        "status": "Active"
+      }
+    ],
+    "recent_form": ["W", "W", "D", "W", "W"],
+    "next_match": {
+      "date": "2024-01-17",
+      "opponent": "Arsenal Youth",
+      "opponent_logo": "arsenal",
+      "venue": "Away",
+      "competition": "Youth League"
+    },
+    "logo": "manchester-united",
+    "league": "premier-league",
+    "created_at": "2023-07-01T10:00:00Z",
+    "updated_at": "2024-01-15T14:30:00Z"
+  },
+  {
+    "id": 4,
+    "name": "Women's Team",
+    "sport": "Football",
+    "division": "Women's Super League",
+    "organisation_id": 1,
+    "organisation_name": "Medinah FC",
+    "is_active": true,
+    "is_locked": false,
+    "parent_squad_id": null,
+    "squad_type": "Women's",
+    "season": "2023-24",
+    "coach": "Lisa Rodriguez",
+    "assistant_coach": "Kate Wilson",
+    "captain": "Emma Thompson",
+    "vice_captain": "Amy Johnson",
+    "formation": "4-3-3",
+    "home_venue": "Women's Stadium",
+    "training_ground": "Training Center C",
+    "squad_size": 23,
+    "active_players": 20,
+    "injured_players": 1,
+    "suspended_players": 0,
+    "stats": {
+      "matches_played": 14,
+      "wins": 10,
+      "draws": 3,
+      "losses": 1,
+      "goals_for": 42,
+      "goals_against": 8,
+      "points": 33,
+      "league_position": 1
+    },
+    "players": [
+      {
+        "athlete_id": 11,
+        "name": "Emma Thompson",
+        "position": "Forward",
+        "jersey_number": 10,
+        "status": "Active"
+      },
+      {
+        "athlete_id": 12,
+        "name": "Amy Johnson",
+        "position": "Midfielder",
+        "jersey_number": 8,
+        "status": "Active"
+      }
+    ],
+    "recent_form": ["W", "W", "W", "D", "W"],
+    "next_match": {
+      "date": "2024-01-19",
+      "opponent": "Chelsea Women",
+      "opponent_logo": "chelsea",
+      "venue": "Home",
+      "competition": "Women's Super League"
+    },
+    "logo": "manchester-city",
+    "league": "premier-league",
+    "created_at": "2023-07-01T10:00:00Z",
+    "updated_at": "2024-01-15T14:30:00Z"
+  }
+]
