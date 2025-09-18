@@ -5,6 +5,7 @@ import EditOutlinedIcon from '@mui/icons-material/EditOutlined';
 import CloseOutlinedIcon from '@mui/icons-material/CloseOutlined';
 import CheckOutlinedIcon from '@mui/icons-material/CheckOutlined';
 import AssessmentOutlinedIcon from '@mui/icons-material/AssessmentOutlined';
+import SettingsOutlinedIcon from '@mui/icons-material/SettingsOutlined';
 import squads from '../data/squads_teams.json'; // Add this import for team data
 import games from '../data/games_matches.json';
 import { BarChart } from '@mui/x-charts/BarChart'; // Fallback to BarChart if Gantt requires Pro
@@ -227,6 +228,18 @@ function TeamPeriodization({ onHeaderControlsChange }) {
           onChange={(e) => setEndDate(e.target.value)}
           InputLabelProps={{ shrink: true }}
         />
+        <Tooltip title="Plan settings (apply before Generate)">
+          <span>
+            <IconButton
+              size="small"
+              color="default"
+              onClick={() => setOpenSettings(true)}
+              sx={{ border: '1px solid var(--color-border-primary)', background:'var(--color-background-secondary)' }}
+            >
+              <SettingsOutlinedIcon fontSize="small" />
+            </IconButton>
+          </span>
+        </Tooltip>
       </Box>
       <Box sx={{ flex: 1 }} />
       <Box sx={{ display: 'flex', gap: 'var(--spacing-md)', alignItems: 'center' }}>
@@ -526,13 +539,7 @@ function TeamPeriodization({ onHeaderControlsChange }) {
                   </span>
                 </Tooltip>
               )}
-             <Tooltip title="Settings">
-               <span>
-                 <IconButton size="small" onClick={()=> setOpenSettings(true)}>
-                   <span className="material-icons" style={{ fontSize: 18 }}>settings</span>
-                 </IconButton>
-               </span>
-             </Tooltip>
+            {/* Settings button moved to global header controls */}
               {/* Moved Generate All Drills button here */}
               {plan?.sessions && plan.sessions.some(s => !s.drills_generated) && (
                 <Button
@@ -1279,12 +1286,20 @@ function TeamPeriodization({ onHeaderControlsChange }) {
       <Dialog open={openSettings} onClose={()=> setOpenSettings(false)} fullWidth maxWidth="sm">
         <DialogTitle>Plan Settings</DialogTitle>
         <DialogContent dividers sx={{ display:'flex', flexDirection:'column', gap:3 }}>
+          {plan && (
+            <Alert severity="info" variant="outlined" sx={{ fontSize:'12px' }}>
+              These settings were applied to the current plan. Changes now will only affect the next generation. Regenerate to apply new values.
+            </Alert>
+          )}
           <Box>
             <Typography variant="subtitle2" gutterBottom>Variability (Model Flexibility)</Typography>
             <Box sx={{ display:'flex', gap:1 }}>
-              {['low','medium','high'].map(level => (
-                <Chip key={level} clickable color={settings.variability===level? 'primary':'default'} label={level} onClick={()=> saveSettings({ ...settings, variability: level })} size="small" />
-              ))}
+              {['low','medium','high'].map(level => {
+                const active = settings.variability===level;
+                return (
+                  <Chip key={level} clickable={!plan} disabled={!!plan} color={active? 'primary':'default'} label={level} onClick={()=> !plan && saveSettings({ ...settings, variability: level })} size="small" />
+                );
+              })}
             </Box>
             <Typography variant="caption" color="text.secondary" sx={{ mt:1, display:'block' }}>
               Controls how adventurous drill selection is (affects sampling temperature & diversity penalties).
@@ -1295,10 +1310,11 @@ function TeamPeriodization({ onHeaderControlsChange }) {
             <TextField
               placeholder="e.g. Improve high press & rapid transition to attack"
               value={settings.objective}
-              onChange={(e)=> saveSettings({ ...settings, objective: e.target.value })}
+              onChange={(e)=> !plan && saveSettings({ ...settings, objective: e.target.value })}
               fullWidth
               multiline
               minRows={2}
+              disabled={!!plan}
             />
             <Typography variant="caption" color="text.secondary" sx={{ mt:1, display:'block' }}>
               Incorporated into AI summary & rationale generation.
@@ -1315,7 +1331,7 @@ function TeamPeriodization({ onHeaderControlsChange }) {
                     <Box sx={{ display:'flex', flexWrap:'wrap', gap:0.5, mt:0.5 }}>
                       {list.map(p => {
                         const active = settings.selectedPrinciples.includes(p.name);
-                        const disabled = !active && settings.selectedPrinciples.length >= 7;
+                        const disabled = (!!plan) || (!active && settings.selectedPrinciples.length >= 7);
                         return (
                           <Chip
                             key={p.name}
@@ -1324,6 +1340,7 @@ function TeamPeriodization({ onHeaderControlsChange }) {
                             color={active? 'primary':'default'}
                             variant={active? 'filled':'outlined'}
                             onClick={()=> {
+                              if (plan) return; // locked after generation
                               if (active) {
                                 saveSettings({ ...settings, selectedPrinciples: settings.selectedPrinciples.filter(n => n !== p.name) });
                               } else if (!disabled) {

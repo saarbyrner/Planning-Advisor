@@ -61,11 +61,31 @@ function buildTimeline(team, fixtures, { weeks, startDate, endDate }) {
       dates.push(d);
     }
   }
+  // Normalize fixture dates to YYYY-MM-DD keys to avoid mismatches (timezones / timestamps)
   const fixtureMap = new Map();
-  fixtures.forEach(f => fixtureMap.set(f.date, f));
+  fixtures.forEach(f => {
+    if (!f) return;
+    const raw = f.date;
+    if (!raw) return;
+    let key;
+    try {
+      key = new Date(raw).toISOString().split('T')[0];
+    } catch {
+      key = (raw + '').split('T')[0];
+    }
+    // Only set first occurrence for a date (ignore duplicates for now)
+    if (key && !fixtureMap.has(key)) fixtureMap.set(key, f);
+  });
   const timeline = dates.map((d, idx) => {
     const iso = d.toISOString().split('T')[0];
-    const fixture = fixtureMap.get(iso);
+    let fixture = fixtureMap.get(iso);
+    // Fallback: try loose match if not found (e.g., original key had timezone causing off-by-one local shift)
+    if (!fixture) {
+      // Look for any fixture whose normalized date matches after constructing Date again (defensive)
+      for (const [k,v] of fixtureMap.entries()) {
+        if (k === iso) { fixture = v; break; }
+      }
+    }
     let color, label, isFixture=false;
     if (fixture) {
       color = 'purple';
@@ -276,9 +296,9 @@ export async function generateHighLevelTeamPlan(teamId, weeksOrOptions = 5) {
   // Use fixtures from options if provided (from Supabase), otherwise fallback to static data
   let teamFixtures;
   if (options.fixtures && Array.isArray(options.fixtures)) {
-    // Convert Supabase fixtures to the expected format
+    // Convert Supabase fixtures ensuring normalized date
     teamFixtures = options.fixtures.map(f => ({
-      date: f.date,
+      date: (()=>{ try { return new Date(f.date).toISOString().split('T')[0]; } catch { return (f.date||'').split('T')[0]; } })(),
       home_team: f.home_team || team.name,
       away_team: f.away_team || f.opponent,
       competition: f.competition || 'League'
@@ -643,9 +663,9 @@ export async function generateTeamPlan(teamId, weeksOrOptions = 5) {
   // Use fixtures from options if provided (from Supabase), otherwise fallback to static data
   let teamFixtures;
   if (options.fixtures && Array.isArray(options.fixtures)) {
-    // Convert Supabase fixtures to the expected format
+    // Convert Supabase fixtures ensuring normalized date
     teamFixtures = options.fixtures.map(f => ({
-      date: f.date,
+      date: (()=>{ try { return new Date(f.date).toISOString().split('T')[0]; } catch { return (f.date||'').split('T')[0]; } })(),
       home_team: f.home_team || team.name,
       away_team: f.away_team || f.opponent,
       competition: f.competition || 'League'
