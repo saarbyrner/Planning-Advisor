@@ -7,6 +7,7 @@ import { createGoogleGenerativeAI } from '@ai-sdk/google';
 import squads from '../data/squads_teams.json';
 import games from '../data/games_matches.json';
 import enrichedDrills from '../data/drills_enriched.json';
+import legacyDrills from '../data/drills.json';
 import principlesData from '../data/principles_of_play.json';
 
 // Backward-compatible per-athlete plan (returns text) used by existing UI (App.jsx)
@@ -331,7 +332,8 @@ export async function generateHighLevelTeamPlan(teamId, weeksOrOptions = 5) {
     settings: {
       variability: options.variability || 'medium',
       objective: options.objective || '',
-      selectedPrinciples: options.userSelectedPrinciples || []
+      selectedPrinciples: options.userSelectedPrinciples || [],
+      generationMode: options.generationMode || 'curated' // curated | hybrid | generative
     }
   };
 }
@@ -372,13 +374,70 @@ export async function generateSessionDrills(plan, sessionIndex, { useModelRefine
   }
   const planVariability = variabilityToNumeric(plan?.settings?.variability);
 
+  // GLOBAL (plan-level) memory of drills used to broaden variety across all sessions.
+  if (!plan.__global_drill_usage) {
+    plan.__global_drill_usage = { countById: {}, chronological: [] };
+  }
+  const globalUsage = plan.__global_drill_usage;
+
+  // Tag rotation cursor (rotates priority tags each session to force exposure of different categories)
+  const ROTATION_TAGS = ['pressing','transition','passing','receiving','mobility','recovery','finishing','possession'];
+  const rotationTag = ROTATION_TAGS[ sessionIndex % ROTATION_TAGS.length ];
+
+  /**
+   * Drill Selection Algorithm (Variety-Oriented)
+   * -------------------------------------------------
+   * Goals:
+   *  - Increase distinct drills across the plan (avoid only 2-3 recurring).
+   *  - Respect phase type & target workload alignment.
+   *  - Prioritize uncovered / low-coverage focus principles.
+   *  - Rotate emphasis tags session-by-session (ROTATION_TAGS) to force themed diversity.
+   *  - Penalize: recent usage (last 3 sessions), overall frequency (global plan memory), within-session duplicates.
+   *  - Fallback: if enriched library for a phase is small, synthesize candidates from legacy `drills.json`.
+   *  - Stochastic sampling (weighted) instead of strict top-N to avoid deterministic repetition.
+   *  - Guarantee at least one drill when any candidates exist.
+   *  - All scoring transparent & easily tunable (see weights & penalties below).
+   */
+
   function pickDrillsForPhase(phaseName, targetLoad, maxDrills) {
     if (maxDrills <= 0) return [];
     const phaseKey = phaseName.toLowerCase();
     const focusSets = plan.focus_principles || {};
     const flatFocus = Object.values(focusSets).flat();
-    // Pre-filter candidates by phase
-    const candidatesRaw = enrichedDrills.filter(d => d.phase && d.phase.toLowerCase() === phaseKey);
+    // Pre-filter candidates by phase (enriched)
+    let candidatesRaw = enrichedDrills.filter(d => d.phase && d.phase.toLowerCase() === phaseKey);
+    // Fallback enrich with synthetic wrapping of legacy drills if pool too small (<4)
+    if (candidatesRaw.length < 4) {
+      const legacyPhase = legacyDrills.filter(ld => {
+        const name = (ld.name||'').toLowerCase();
+        if (/warm/.test(phaseKey)) return /warm/.test(name) || /rondo/.test(name);
+        if (/cool/.test(phaseKey)) return /stretch|cool/.test(name);
+        if (/technical/.test(phaseKey)) return /pass|possession|shoot|cross/.test(name);
+        if (/tactic|transition/.test(phaseKey)) return /press|transition|shape/.test(name);
+        return true;
+      }).map((ld,i) => ({
+        id: 'legacy_'+phaseKey+'_'+i+'_'+ld.name.replace(/\s+/g,'_').toLowerCase(),
+        name: ld.name,
+        phase: phaseName,
+        category: [phaseKey],
+        objective_primary: ld.instructions,
+        objectives_secondary: (ld.goals? ld.goals.split(/;|,/).map(s=>s.trim()) : []),
+        duration_min: ld.duration-3>0? ld.duration-3: Math.max(5, Math.round(ld.duration*0.6)),
+        duration_max: ld.duration,
+        workload: ld.load || targetLoad,
+        equipment: ld.equipment ? ld.equipment.split(',').map(s=>s.trim()) : [],
+        media: { image_urls: [], alt_text: ld.visual },
+        source: { name: 'legacy', quality_weight: 0.4 },
+        coaching_points: [],
+        constraints: [],
+        progressions: [],
+        regressions: [],
+        players: {},
+        space: {},
+        last_reviewed: null
+      }));
+      candidatesRaw = [...candidatesRaw, ...legacyPhase];
+    }
     const scored = candidatesRaw.map(d => {
       // Base quality & workload alignment
       const wlDistance = d.workload === targetLoad ? 0 : 1;
@@ -396,11 +455,14 @@ export async function generateSessionDrills(plan, sessionIndex, { useModelRefine
             else principleBoost += 0.12;
         }
       });
+      // Rotation tag bonus (to ensure each session emphasises a different thematic bucket)
+      if (d.tags?.includes(rotationTag) || d.category?.includes(rotationTag)) principleBoost += 0.18;
       // Uniqueness penalties
       const recentPenalty = recentDrillIds.has(d.id) ? 0.25 : 0;
       const freqPenalty = usageFreq.has(d.id) ? Math.min(0.15 * usageFreq.get(d.id), 0.45) : 0;
+      const globalPenalty = globalUsage.countById[d.id] ? Math.min(0.07 * globalUsage.countById[d.id], 0.42) : 0;
       const withinSessionPenalty = pickedThisSession.has(d.id) ? 0.5 : 0; // strong penalty if somehow still present
-      const score = quality - wlDistance * 0.18 + recency + principleBoost - recentPenalty - freqPenalty - withinSessionPenalty;
+      const score = quality - wlDistance * 0.18 + recency + principleBoost - recentPenalty - freqPenalty - withinSessionPenalty - globalPenalty;
       return { drill: d, score };
     })
     .sort((a,b) => b.score - a.score);
@@ -434,7 +496,17 @@ export async function generateSessionDrills(plan, sessionIndex, { useModelRefine
       if (pickedThisSession.has(cand.id)) { weights[idx] = 0; continue; }
       chosen.push(cand);
       pickedThisSession.add(cand.id);
+      globalUsage.countById[cand.id] = (globalUsage.countById[cand.id]||0) + 1;
+      globalUsage.chronological.push(cand.id);
       weights[idx] = 0; // remove from future sampling
+    }
+    // Guarantee at least 1 drill if pool had any candidates
+    if (chosen.length === 0 && scored.length) {
+      const fallback = scored[0].drill;
+      chosen.push(fallback);
+      pickedThisSession.add(fallback.id);
+      globalUsage.countById[fallback.id] = (globalUsage.countById[fallback.id]||0) + 1;
+      globalUsage.chronological.push(fallback.id);
     }
     return chosen.map(drill => ({
       id: drill.id,
@@ -456,6 +528,74 @@ export async function generateSessionDrills(plan, sessionIndex, { useModelRefine
       space: drill.space,
       raw: drill
     }));
+  }
+
+  /**
+   * Generative drill creation (model-based) when generationMode is 'generative' or 'hybrid'.
+   * For 'hybrid' we only invoke model for phases that received 0 curated drills.
+   */
+  async function generateDrillsViaModel(phasesForGen, basePhasesMeta) {
+    const apiKey = getApiKey();
+    if (!apiKey) return {};
+    const model = getGoogleAI()('models/gemini-1.5-flash-latest');
+    const sessionLoad = session.overall_load;
+    const principlesList = (session.principles_applied || []).join('; ');
+    const phaseDescriptor = phasesForGen.map(p => ({ name: p.name, target_intensity: p.target_intensity||p.intensity||'Medium'}));
+    const prompt = `You are an elite soccer periodization coach. Create detailed drills for the following session.
+Session Load: ${sessionLoad}\nDate: ${session.date}\nSession Principles: ${principlesList}
+Phases (with desired target intensity hints): ${phaseDescriptor.map(p=>p.name+'('+p.target_intensity+')').join(', ')}
+Return STRICT JSON only in this schema:
+{"phases":[{"phase":"Phase Name","drills":[{"name":"Drill Name","duration":10,"load":"Low|Medium|High","objective_primary":"Primary objective","objectives_secondary":["Secondary A","Secondary B"],"equipment":["Balls","Cones"],"coaching_points":["Coaching point 1"],"constraints":["Rule"],"progressions":["Progression"],"regressions":["Regression"],"players":{"arrangement":"Shape or numbers"},"space":{"dimensions":"Area dimensions"}}]}]}
+Guidelines:
+- 1–3 drills per phase depending on intensity (High up to 3, Low often 1-2).
+- Duration sum per phase should not exceed 35 minutes and be realistic vs intensity.
+- Use varied objectives (avoid repeating identical wording across drills).
+- Avoid unsafe instructions; no heading repetitions for youth excessively, no overtraining cues.
+- If a phase is Cool Down include recovery / down regulation focus.
+STRICT JSON ONLY.`;
+    try {
+      const { text } = await generateText({ model, prompt, maxTokens: 1400 });
+      const cleaned = text.trim().replace(/^```json/i,'').replace(/```$/,'');
+      const parsed = JSON.parse(cleaned);
+      if (!parsed || !Array.isArray(parsed.phases)) return {};
+      const result = {};
+      parsed.phases.forEach(ph => {
+        if (!ph || !ph.phase || !Array.isArray(ph.drills)) return;
+        const safeDrills = ph.drills.slice(0,4).map((d,i)=>({
+          id: 'gen_'+sessionIndex+'_'+ph.phase.replace(/\s+/g,'_').toLowerCase()+'_'+i,
+          name: (d.name||'Unnamed Drill').trim().slice(0,80),
+          duration: Number.isFinite(d.duration)? Math.max(4, Math.min(40, Math.round(d.duration))) : 10,
+          load: ['Low','Medium','High'].includes(d.load)? d.load : inferLoadFromPhase(ph.phase, sessionLoad),
+          staff: 'Coach',
+          instructions: d.objective_primary || d.description || 'Execute with quality and intensity.',
+            goals: Array.isArray(d.objectives_secondary)? d.objectives_secondary.join('; '):'',
+          equipment: Array.isArray(d.equipment)? d.equipment.join(', ') : (typeof d.equipment==='string'? d.equipment:''),
+          visual: d.space?.dimensions || '',
+          media: {},
+          source: { name: 'ai-generated', quality_weight: 0.5 },
+          coaching_points: d.coaching_points || [],
+          constraints: d.constraints || [],
+          progressions: d.progressions || [],
+          regressions: d.regressions || [],
+          players: d.players || {},
+          space: d.space || {},
+          raw: d
+        }));
+        result[ph.phase] = safeDrills;
+      });
+      return result;
+    } catch (e) {
+      console.warn('Generative drill JSON parse failed', e);
+      return {};
+    }
+  }
+
+  function inferLoadFromPhase(phase, sessionLoad) {
+    if (/warm/i.test(phase) || /cool/i.test(phase)) return 'Low';
+    if (/transition/i.test(phase)) return sessionLoad === 'High' ? 'High' : 'Medium';
+    if (/tactic/i.test(phase)) return sessionLoad === 'High' ? 'High' : 'Medium';
+    if (/technic/i.test(phase)) return sessionLoad === 'High' ? 'Medium' : sessionLoad;
+    return sessionLoad || 'Medium';
   }
 
   const load = session.overall_load;
@@ -522,6 +662,35 @@ export async function generateSessionDrills(plan, sessionIndex, { useModelRefine
       );
     }
   });
+
+  const generationMode = plan?.settings?.generationMode || 'curated';
+  if (generationMode === 'generative' || generationMode === 'hybrid') {
+    const phasesNeedingGen = [];
+    if (generationMode === 'generative') {
+      // All core phases + warm/cool
+      if (warmPhase) phasesNeedingGen.push(warmPhase);
+      corePhases.forEach(p=> phasesNeedingGen.push(p));
+      if (coolPhase) phasesNeedingGen.push(coolPhase);
+    } else { // hybrid: only empty ones
+      if (warmPhase && warm.length===0) phasesNeedingGen.push(warmPhase);
+      corePhases.forEach(p=> { if (!coreDrillMap[p.name] || coreDrillMap[p.name].length===0) phasesNeedingGen.push(p); });
+      if (coolPhase && cool.length===0) phasesNeedingGen.push(coolPhase);
+    }
+    if (phasesNeedingGen.length) {
+      const genResult = await generateDrillsViaModel(phasesNeedingGen, { warmPhase, coolPhase, corePhases });
+      phasesNeedingGen.forEach(p => {
+        const list = genResult[p.name] || genResult[p.name.replace(/_/g,' ')] || [];
+        if (!list.length) return; // keep existing if generation failed
+        if (/warm/i.test(p.name)) {
+          warm.length = 0; list.slice(0,2).forEach(d=>warm.push(d));
+        } else if (/cool/i.test(p.name)) {
+          cool.length = 0; list.slice(0,2).forEach(d=>cool.push(d));
+        } else {
+          coreDrillMap[p.name] = list;
+        }
+      });
+    }
+  }
   // For backward compatibility keep named references if original canonical names exist
   const tech = Object.entries(coreDrillMap).filter(([name])=>/Technical/i.test(name)).flatMap(([_,list])=>list);
   const tact = Object.entries(coreDrillMap).filter(([name])=>/Tactic|Transition/i.test(name)).flatMap(([_,list])=>list);
@@ -723,7 +892,8 @@ export async function generateTeamPlan(teamId, weeksOrOptions = 5) {
     settings: {
       variability: options.variability || 'medium',
       objective: options.objective || '',
-      selectedPrinciples: options.userSelectedPrinciples || []
+      selectedPrinciples: options.userSelectedPrinciples || [],
+      generationMode: options.generationMode || 'curated' // Ensure included in legacy return path
     }
   };
 }

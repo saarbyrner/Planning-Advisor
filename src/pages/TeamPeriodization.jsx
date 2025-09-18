@@ -54,7 +54,8 @@ function TeamPeriodization({ onHeaderControlsChange }) {
     return {
       variability: 'medium', // low | medium | high
       objective: '',
-      selectedPrinciples: [] // array of principle names (cap 7)
+      selectedPrinciples: [], // array of principle names (cap 7)
+      generationMode: 'curated' // curated | hybrid | generative
     };
   });
   const saveSettings = (next) => {
@@ -142,6 +143,7 @@ function TeamPeriodization({ onHeaderControlsChange }) {
       fixtures: teamFixtures,
       objective: settings.objective || undefined,
       variability: settings.variability,
+      generationMode: settings.generationMode || 'curated',
       userSelectedPrinciples: settings.selectedPrinciples && settings.selectedPrinciples.length ? settings.selectedPrinciples : undefined
     };
     const generatedPlan = await generateHighLevelTeamPlan(selectedTeamId, options);
@@ -1318,6 +1320,36 @@ function TeamPeriodization({ onHeaderControlsChange }) {
             />
             <Typography variant="caption" color="text.secondary" sx={{ mt:1, display:'block' }}>
               Incorporated into AI summary & rationale generation.
+            </Typography>
+          </Box>
+          <Box>
+            <Typography variant="subtitle2" gutterBottom>Drill Generation Mode</Typography>
+            <Box sx={{ display:'flex', gap:1, flexWrap:'wrap' }}>
+              {[
+                { key:'curated', label:'Curated', tip:'Only use vetted drills library (stable, repeatable).'},
+                { key:'hybrid', label:'Hybrid', tip:'Mix vetted drills with some AI-created drills (balanced).'},
+                { key:'generative', label:'Generative', tip:'Allow full AI creation of drills (novel, may need review).'}
+              ].map(opt => {
+                const active = settings.generationMode === opt.key;
+                return (
+                  <Tooltip key={opt.key} title={opt.tip} arrow>
+                    <span>
+                      <Chip
+                        clickable={!plan}
+                        disabled={!!plan}
+                        color={active? 'primary':'default'}
+                        label={opt.label}
+                        onClick={()=> !plan && saveSettings({ ...settings, generationMode: opt.key })}
+                        size="small"
+                        variant={active? 'filled':'outlined'}
+                      />
+                    </span>
+                  </Tooltip>
+                );
+              })}
+            </Box>
+            <Typography variant="caption" color="text.secondary" sx={{ mt:1, display:'block' }}>
+              Curated = safest. Hybrid = some novelty. Generative = maximum creativity (JSON-validated, may produce imperfect drills; edit as needed).
             </Typography>
           </Box>
           <Box>
