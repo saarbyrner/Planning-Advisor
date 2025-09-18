@@ -24,7 +24,8 @@ import {
   SettingsOutlined,
   HelpOutlined,
   ChevronLeftOutlined,
-  ChevronRightOutlined
+  ChevronRightOutlined,
+  FolderOpenOutlined
 } from '@mui/icons-material'
 import '../styles/design-tokens.css'
 
@@ -90,7 +91,7 @@ const navigationItems = [
     id: 'team-planning', 
     label: 'Planning Advisor', 
     icon: CalendarMonthOutlined, 
-    path: '/team-planning',
+    path: '/plan-management',
     section: 'main'
   }
 ]

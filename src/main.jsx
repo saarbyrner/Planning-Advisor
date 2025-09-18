@@ -4,7 +4,7 @@ import { BrowserRouter } from 'react-router-dom'
 import App from './App'
 import { LicenseInfo } from '@mui/x-data-grid-premium';
 
-LicenseInfo.setLicenseKey('4e5ec90a1afaadb78690f94968111927Tz05NTgxNSxFPTE3NTQ3NDE0NDcwMDAsUz1wcmVtaXVtLExNPXN1YnNjcmlwdGlvbixQVj1pbml0aWFsLEtWPTI=');
+LicenseInfo.setLicenseKey('bc1c125f0df063ef4d354f52404b3b86Tz0xMTc1MzksRT0xNzg2NTc5MTk5MDAwLFM9cHJlbWl1bSxMTT1zdWJzY3JpcHRpb24sUFY9aW5pdGlhbCxLVj0y');
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <BrowserRouter>

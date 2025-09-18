@@ -1,0 +1,102 @@
+[
+  {
+    "name": "Rondos Warm Up",
+    "duration": 10,
+    "load": "Medium",
+    "staff": "Assistant Coach",
+    "instructions": "Players pass in a circle, focus on quick touches",
+    "goals": "Improve ball control and awareness",
+    "equipment": "Balls",
+    "visual": "Circle formation on field"
+  },
+  {
+    "name": "Passing Accuracy Drill",
+    "duration": 15,
+    "load": "Medium",
+    "staff": "Head Coach",
+    "instructions": "Pass through gates with varying distances",
+    "goals": "Enhance passing precision",
+    "equipment": "Cones, balls",
+    "visual": "Gates setup in grid"
+  },
+  {
+    "name": "Transition Game",
+    "duration": 20,
+    "load": "High",
+    "staff": "Tactical Coach",
+    "instructions": "5v5 game focusing on quick switches",
+    "goals": "Improve transitions from defense to attack",
+    "equipment": "Balls, vests",
+    "visual": "Half-pitch with goals"
+  },
+  {
+    "name": "Pressing Drill",
+    "duration": 20,
+    "load": "High",
+    "staff": "Tactical Coach",
+    "instructions": "High-press simulation in zones",
+    "goals": "Develop pressing intensity",
+    "equipment": "Cones, balls",
+    "visual": "Zoned field areas"
+  },
+  {
+    "name": "Static Stretching",
+    "duration": 10,
+    "load": "Low",
+    "staff": "Physio",
+    "instructions": "Full-body static stretches",
+    "goals": "Aid muscle recovery",
+    "equipment": "Mats",
+    "visual": "Group circle"
+  },
+  {
+    "name": "Shooting Practice",
+    "duration": 25,
+    "load": "Medium",
+    "staff": "Attacking Coach",
+    "instructions": "Shoot from different angles after receiving pass",
+    "goals": "Improve finishing accuracy",
+    "equipment": "Goals, balls",
+    "visual": "Penalty box setup"
+  },
+  {
+    "name": "Defensive Shape",
+    "duration": 30,
+    "load": "High",
+    "staff": "Defensive Coach",
+    "instructions": "Maintain shape against attacking waves",
+    "goals": "Strengthen defensive organization",
+    "equipment": "Cones, vests",
+    "visual": "Full backline formation"
+  },
+  {
+    "name": "Possession Drill",
+    "duration": 20,
+    "load": "Medium",
+    "staff": "Head Coach",
+    "instructions": "Keep possession in small area",
+    "goals": "Improve ball retention",
+    "equipment": "Balls, cones",
+    "visual": "10x10 grid"
+  },
+  {
+    "name": "Crossing Drill",
+    "duration": 25,
+    "load": "Medium",
+    "staff": "Assistant Coach",
+    "instructions": "Cross from flanks and finish",
+    "goals": "Enhance crossing accuracy",
+    "equipment": "Goals, balls",
+    "visual": "Wing areas with mannequins"
+  },
+  {
+    "name": "Goalkeeper Distribution",
+    "duration": 15,
+    "load": "Low",
+    "staff": "Goalkeeping Coach",
+    "instructions": "Distribute ball to teammates",
+    "goals": "Improve build-up from back",
+    "equipment": "Goals, balls",
+    "visual": "Full pitch from goal"
+  }
+]

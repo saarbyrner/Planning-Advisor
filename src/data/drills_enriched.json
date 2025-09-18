@@ -1,0 +1,168 @@
+[
+  {
+    "id": "warmup_rondo_possession_5v2",
+    "name": "5v2 Rondo Activation",
+    "phase": "Warm Up",
+    "category": ["technical", "possession", "activation"],
+    "age_groups": ["U13+"],
+    "objective_primary": "Quick decision-making under light pressure",
+    "objectives_secondary": ["First touch preparation", "Awareness / scanning"],
+    "duration_min": 8,
+    "duration_max": 12,
+    "workload": "Low",
+    "intensity_descriptor": "Neuromuscular activation and cognitive priming",
+    "players": {"total": 7, "arrangement": "5 outside, 2 inside pressers", "rotations": "Rotate pressers every 60-90s"},
+    "constraints": ["2-touch maximum for outside players", "If defenders win ball they swap roles"],
+    "equipment": ["Balls", "10x10 grid cones"],
+    "space": {"dimensions": "10x10m square", "adaptation": "Reduce to 8x8m to increase pressure"},
+    "coaching_points": [
+      "Receive on the half-turn where possible",
+      "Scan before receiving, especially when ball travels",
+      "Tempo increases gradually – avoid early burnout"
+    ],
+    "progressions": [
+      "Add third defender to create 5v3 with 1-touch rule for 30s bursts",
+      "Limit outside players to 1-touch when defenders are 2m away"
+    ],
+    "regressions": ["Allow unlimited touches", "Increase grid to 12x12m"],
+    "safety_notes": ["Ensure adequate dynamic mobility prior if cold weather"],
+    "source": {
+      "name": "The FA Boot Room (conceptual inspiration)",
+      "url": "https://thebootroom.thefa.com/",
+      "category": "Official Governing Body",
+      "quality_weight": 0.95
+    },
+    "media": {
+      "diagram_svg": null,
+      "image_urls": ["/assets/drills/rondo_5v2.png"],
+      "video_urls": ["https://www.youtube.com/watch?v=Jk1RondoExample"],
+      "alt_text": "Players arranged in square with two central pressers"
+    },
+    "tags": ["warmup", "rondo", "possession", "scanning"],
+    "language": "en",
+    "last_reviewed": "2025-09-18",
+    "validation": {"curated": true, "reviewer_initials": "SB"}
+  },
+  {
+    "id": "technical_passing_gates_progressive",
+    "name": "Progressive Passing Gates Chains",
+    "phase": "Technical",
+    "category": ["technical", "passing", "receiving"],
+    "age_groups": ["U14+"],
+    "objective_primary": "Improve forward passing accuracy and tempo",
+    "objectives_secondary": ["Support angles", "First touch direction"],
+    "duration_min": 12,
+    "duration_max": 18,
+    "workload": "Medium",
+    "intensity_descriptor": "Aerobic technical load with brief accelerations",
+    "players": {"total": 8, "arrangement": "Two lines facing, neutral bounce players wide", "rotations": "Rotate neutrals every 3 min"},
+    "constraints": ["Forward pass must break a line (through gate)", "Receiver must take first touch into space"],
+    "equipment": ["Balls", "Cones", "Mini gates"],
+    "space": {"dimensions": "25x20m zone divided into lanes", "adaptation": "Shorten to 20x18m to increase tempo"},
+    "coaching_points": [
+      "Head up early to identify gate",
+      "Quality of first touch sets tempo",
+      "Communication (verbal & non-verbal cues)"
+    ],
+    "progressions": ["Add passive defender screening central gates", "One-touch rule after successful sequence"],
+    "regressions": ["Remove gate requirement", "Allow extra neutral support"],
+    "safety_notes": ["Monitor overstriding on longer passes"],
+    "source": {
+      "name": "U.S. Soccer Learning Center (conceptual pattern)",
+      "url": "https://learning.ussoccer.com/coach",
+      "category": "Official Governing Body",
+      "quality_weight": 0.93
+    },
+    "media": {
+      "diagram_svg": null,
+      "image_urls": ["/assets/drills/passing_gates.png"],
+      "video_urls": ["https://www.youtube.com/watch?v=PassGateExample"],
+      "alt_text": "Players passing through mini gated channels"
+    },
+    "tags": ["passing", "technical", "support", "warm progression"],
+    "language": "en",
+    "last_reviewed": "2025-09-18",
+    "validation": {"curated": true, "reviewer_initials": "SB"}
+  },
+  {
+    "id": "tactical_pressing_zones_game",
+    "name": "High Press Trigger Zones 6v4",
+    "phase": "Tactical",
+    "category": ["tactical", "pressing", "transition"],
+    "age_groups": ["U15+"],
+    "objective_primary": "Rehearse coordinated high press triggers",
+    "objectives_secondary": ["Compactness", "Immediate transition to attack"],
+    "duration_min": 15,
+    "duration_max": 25,
+    "workload": "High",
+    "intensity_descriptor": "Repeated anaerobic efforts with tactical focus",
+    "players": {"total": 10, "arrangement": "6 pressing team vs 4 build-out", "rotations": "Rotate 6 every 3-4 presses"},
+    "constraints": ["Pressing team initiates on backward pass trigger", "If possession won must attack mini goal in 5s"],
+    "equipment": ["Balls", "Cones", "Mini goals", "Vests"],
+    "space": {"dimensions": "35x30m with horizontal thirds", "adaptation": "Widen if build-out too constrained"},
+    "coaching_points": [
+      "First defender angle to screen center",
+      "Second wave squeezes simultaneously",
+      "Immediate vertical option after regain"
+    ],
+    "progressions": ["Allow build-out to add 5th player", "Add target zone to play out for point"],
+    "regressions": ["Remove time constraint on counter", "Reduce pressing team to 5"],
+    "safety_notes": ["Ensure full recovery between high-intensity sets"],
+    "source": {
+      "name": "The FA Boot Room (pressing principles inspiration)",
+      "url": "https://thebootroom.thefa.com/",
+      "category": "Official Governing Body",
+      "quality_weight": 0.95
+    },
+    "media": {
+      "diagram_svg": null,
+      "image_urls": ["/assets/drills/pressing_zones.png"],
+      "video_urls": ["https://www.youtube.com/watch?v=PressTriggersExample"],
+      "alt_text": "Grid divided into thirds showing pressing shape"
+    },
+    "tags": ["pressing", "tactical", "transition", "high_intensity"],
+    "language": "en",
+    "last_reviewed": "2025-09-18",
+    "validation": {"curated": true, "reviewer_initials": "SB"}
+  },
+  {
+    "id": "cooldown_static_stretch_bundle",
+    "name": "Guided Static Stretch Series",
+    "phase": "Cool Down",
+    "category": ["recovery"],
+    "age_groups": ["U13+"],
+    "objective_primary": "Facilitate parasympathetic shift and tissue recovery",
+    "objectives_secondary": ["Flexibility maintenance"],
+    "duration_min": 8,
+    "duration_max": 12,
+    "workload": "Low",
+    "intensity_descriptor": "Down-regulation and breathing focus",
+    "players": {"total": 20, "arrangement": "Circle or lines", "rotations": null},
+    "constraints": ["Hold each stretch 20-30s", "No ballistic movement"],
+    "equipment": ["Mats"],
+    "space": {"dimensions": "Half pitch corner", "adaptation": "Indoor space if weather poor"},
+    "coaching_points": [
+      "Controlled exhalation during holds",
+      "No pain beyond mild tension"
+    ],
+    "progressions": ["Add light band-assisted stretches"],
+    "regressions": ["Reduce hold time to 15s"],
+    "safety_notes": ["Screen for acute muscle injuries before participation"],
+    "source": {
+      "name": "General best practice (non-source specific)",
+      "url": null,
+      "category": "Generic",
+      "quality_weight": 0.6
+    },
+    "media": {
+      "diagram_svg": null,
+      "image_urls": ["/assets/drills/static_stretch.png"],
+      "video_urls": ["https://www.youtube.com/watch?v=StaticStretchExample"],
+      "alt_text": "Players performing static stretches" 
+    },
+    "tags": ["recovery", "cool_down", "flexibility"],
+    "language": "en",
+    "last_reviewed": "2025-09-18",
+    "validation": {"curated": true, "reviewer_initials": "SB"}
+  }
+]

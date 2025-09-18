@@ -11,12 +11,17 @@ import {
   MenuItem,
   Badge,
   Select,
-  CssBaseline
+  CssBaseline,
+  FormControl,
+  InputLabel,
+  Button
 } from '@mui/material'
 import { 
-  Notifications
+  Notifications,
+  KeyboardArrowDownOutlined
 } from '@mui/icons-material'
 import MainNavigation from './MainNavigation'
+import KitmanLogo from '/public/assets/logos/Kitman Labs base.png'
 import '../styles/design-tokens.css'
 
 // Mock current user data
@@ -46,10 +51,11 @@ const pageTitles = {
   '/planning': 'Calendar',
   '/activity': 'Activity log',
   '/settings': 'Admin',
-  '/help': 'Help'
+  '/help': 'Help',
+  '/plan-management': 'Planning Advisor'
 }
 
-function MedinahLayoutWithMainNav({ children }) {
+function MedinahLayoutWithMainNav({ children, headerControls }) {
   const location = useLocation()
   const [isNavOpen, setIsNavOpen] = useState(true)
   const [currentSquad, setCurrentSquad] = useState(availableSquads[0])
@@ -101,38 +107,41 @@ function MedinahLayoutWithMainNav({ children }) {
         <AppBar 
           position="sticky" 
           elevation={1}
-          sx={{ 
-            bgcolor: '#ffffff',
-            color: '#333333',
-            borderBottom: '1px solid #e0e0e0',
-            boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)'
-          }}
+            sx={{ 
+              bgcolor: 'var(--color-white)',
+              color: 'var(--color-text-primary)',
+              borderBottom: '1px solid var(--color-border-primary)',
+              boxShadow: '0 1px 3px rgba(0, 0, 0, 0.08)'
+            }}
         >
           <Toolbar sx={{ justifyContent: 'space-between' }}>
-            {/* Page Title */}
-            <Typography 
-              variant="h6" 
-              component="h1"
-              sx={{ 
-                fontWeight: 600,
-                color: 'var(--color-text-primary)',
-                textTransform: 'none'
-              }}
-            >
-              {getPageTitle()}
-            </Typography>
+            {/* Left Side - Title Only */}
+            <Box sx={{ display: 'flex', alignItems: 'center' }}>
+              <Typography 
+                variant="h6" 
+                component="h1"
+                sx={{ 
+                  fontWeight: 600,
+                  color: 'var(--color-text-primary)',
+                  textTransform: 'none'
+                }}
+              >
+                {getPageTitle()}
+              </Typography>
+            </Box>
 
             {/* Right Side Actions */}
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-              {/* Squad Selector */}
+              {/* Active Roster Selector */}
               <Select
                 value={currentSquad.id}
                 onChange={handleSquadChange}
                 displayEmpty
                 size="small"
+                endAdornment={<KeyboardArrowDownOutlined sx={{ fontSize: 16 }} />}
                 sx={{ 
                   fontSize: '14px',
-                  minWidth: 160,
+                  minWidth: 140,
                   backgroundColor: '#ffffff',
                   border: 'none',
                   boxShadow: 'none',
@@ -151,20 +160,6 @@ function MedinahLayoutWithMainNav({ children }) {
                   </MenuItem>
                 ))}
               </Select>
-
-              {/* Notifications */}
-              <IconButton 
-                sx={{ 
-                  color: 'var(--color-text-secondary)',
-                  '&:hover': { 
-                    bgcolor: 'rgba(0, 0, 0, 0.04)' 
-                  }
-                }}
-              >
-                <Badge badgeContent={3} color="error">
-                  <Notifications />
-                </Badge>
-              </IconButton>
 
               {/* User Menu */}
               <Avatar 
@@ -197,6 +192,18 @@ function MedinahLayoutWithMainNav({ children }) {
               </Menu>
             </Box>
           </Toolbar>
+          
+          {/* Header Controls - Full Width */}
+            {headerControls && (
+              <Box sx={{ 
+                px: 3, 
+                py: 2, 
+                borderTop: '1px solid var(--color-border-primary)',
+                bgcolor: 'var(--color-white)'
+              }}>
+                {headerControls}
+              </Box>
+            )}
         </AppBar>
 
         {/* Page Content */}
@@ -208,7 +215,36 @@ function MedinahLayoutWithMainNav({ children }) {
             bgcolor: 'var(--color-background-secondary)'
           }}
         >
-          {children}
+          <Box
+            sx={{
+              width: '100%',
+              boxSizing: 'border-box',
+              px: 0,
+              pt: 'var(--spacing-md)',
+              pb: 'var(--spacing-lg)',
+              display: 'flex',
+              flexDirection: 'column'
+            }}
+          >
+            <Box
+              sx={(theme) => {
+                const isTeamPlanning = location.pathname === '/team-planning';
+                return {
+                  width: '100%',
+                  backgroundColor: 'var(--color-background-primary)',
+                  border: '1px solid var(--color-border-primary)',
+                  borderRadius: 'var(--radius-md)',
+                  boxShadow: 'var(--shadow-sm)',
+                  p: (isTeamPlanning || location.pathname === '/plan-management') ? 0 : 'var(--spacing-md)',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  overflow: 'hidden'
+                };
+              }}
+            >
+              {children}
+            </Box>
+          </Box>
         </Box>
       </Box>
     </Box>

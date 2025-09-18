@@ -1,0 +1,23 @@
+{
+  "principles_of_play": {
+    "attacking": [
+      {"name": "Penetration", "description": "The ability to play through or behind the opponent's defense to create goal-scoring opportunities. This can be achieved by dribbling, passing, or shooting."},
+      {"name": "Support", "description": "Providing close options for the player on the ball to create passing lanes and maintain possession. Support can be offered ahead of, behind, or to the side of the ball carrier."},
+      {"name": "Width", "description": "Stretching the opponent's defensive shape horizontally by positioning players near the sidelines. This creates space in central areas for penetration."},
+      {"name": "Mobility", "description": "Intelligent off-the-ball movement by players to create space for themselves or teammates. This includes checking to the ball, making runs in behind, or rotating positions."},
+      {"name": "Creativity/Improvisation", "description": "Using individual skill, flair, and unpredictable actions to unbalance the defense. This includes skills like feints, tricks, or unexpected passes."}
+    ],
+    "defending": [
+      {"name": "Pressure", "description": "The immediate action of the nearest defender to close down the player with the ball, aiming to restrict their time and space to make decisions."},
+      {"name": "Delay", "description": "Slowing down the opponent's attack, especially when outnumbered, to allow teammates to recover into a solid defensive shape. The primary goal is to prevent immediate penetration."},
+      {"name": "Cover", "description": "A second defender providing support to the pressuring defender. They are positioned to intercept a pass or challenge the attacker if the first defender is beaten."},
+      {"name": "Balance", "description": "The positioning of defenders away from the ball to cover key spaces and players, preventing the opposition from easily switching the point of attack."},
+      {"name": "Compactness", "description": "Reducing the vertical and horizontal space between defensive players and units to deny the opposition space to play through the team's defensive block."},
+      {"name": "Control/Restraint", "description": "Defenders making disciplined decisions, avoiding reckless challenges, and staying on their feet to force the attacker into making a mistake."}
+    ],
+    "transition": [
+      {"name": "Transition to Attack (Positive Transition)", "description": "The team's immediate reaction after winning possession. The aim is to quickly switch from a defensive to an attacking mindset, often by playing a forward pass to exploit the disorganized opponent."},
+      {"name": "Transition to Defend (Negative Transition)", "description": "The team's immediate reaction after losing possession. The aim is to either apply immediate pressure to win the ball back (counter-press) or recover quickly into a compact defensive shape."}
+    ]
+  }
+}
