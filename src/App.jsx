@@ -1,7 +1,8 @@
-import { Routes, Route } from 'react-router-dom'
+import { Routes, Route, useLocation } from 'react-router-dom'
 import LayoutWithMainNav from './components/LayoutWithMainNav'
 import SimplePage from './pages/SimplePage'
 import Athletes from './pages/Athletes'
+import TeamPeriodization from './pages/TeamPeriodization';
 import { useState, useEffect } from 'react';
 import { AthleteDataGrid, Button, Card } from './components';
 import { getAthletes, getFixtures, getPerformance, savePlan } from './utils/supabase';
@@ -10,6 +11,7 @@ import { generatePlan } from './utils/generatePlan';
 function App() {
   const [athletes, setAthletes] = useState([]);
   const [selectedPlan, setSelectedPlan] = useState('');
+  const location = useLocation();
 
   useEffect(() => {
     async function fetchData() {
@@ -41,12 +43,18 @@ function App() {
         <Route path="/activity" element={<SimplePage pageName="Activity log" />} />
         <Route path="/settings" element={<SimplePage pageName="Admin" />} />
         <Route path="/help" element={<SimplePage pageName="Help" />} />
+        <Route path="/team-planning" element={<TeamPeriodization />} />
       </Routes>
-      <AthleteDataGrid athletes={athletes} />
-      {athletes.map(athlete => (
-        <Button key={athlete.id} onClick={() => handleGenerate(athlete)}>Generate Plan for {athlete.name}</Button>
-      ))}
-      {selectedPlan && <Card>{selectedPlan}</Card>}
+      {/* Temporarily comment out AthleteDataGrid to avoid MUI license warnings */}
+      {/* {location.pathname !== '/team-planning' && <AthleteDataGrid athletes={athletes} />} */}
+      {location.pathname === '/workloads' && (
+        <>
+          {athletes.map(athlete => (
+            <Button key={athlete.id} onClick={() => handleGenerate(athlete)}>Generate Plan for {athlete.name}</Button>
+          ))}
+          {selectedPlan && <Card>{selectedPlan}</Card>}
+        </>
+      )}
     </LayoutWithMainNav>
   )
 }

@@ -21,6 +21,7 @@
     "@emotion/styled": "^11.11.0",
     "@mui/icons-material": "^5.14.3",
     "@mui/material": "^5.14.3",
+    "@mui/x-charts": "^8.11.3",
     "@mui/x-data-grid-premium": "^6.20.5",
     "@supabase/supabase-js": "^2.57.4",
     "ai": "^5.0.45",

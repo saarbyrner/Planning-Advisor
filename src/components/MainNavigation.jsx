@@ -85,6 +85,13 @@ const navigationItems = [
     icon: SettingsOutlined, 
     path: '/settings',
     section: 'main'
+  },
+  { 
+    id: 'team-planning', 
+    label: 'Planning Advisor', 
+    icon: CalendarMonthOutlined, 
+    path: '/team-planning',
+    section: 'main'
   }
 ]
 
