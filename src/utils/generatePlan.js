@@ -142,12 +142,17 @@ Focus on the user's specific objectives: ${userObjective}`;
   
   console.log('AI summary response:', text);
   
+  // Clean the response by removing markdown code blocks
+  const cleanedText = text.trim().replace(/^```json\s*/i, '').replace(/\s*```$/i, '').trim();
+  console.log('Cleaned AI summary response:', cleanedText);
+  
   let parsed;
   try {
-    parsed = JSON.parse(text);
+    parsed = JSON.parse(cleanedText);
   } catch (parseError) {
     console.error('Failed to parse AI summary response:', parseError);
     console.error('Raw response:', text);
+    console.error('Cleaned response:', cleanedText);
     throw new Error(`AI summary response was not valid JSON: ${parseError.message}`);
   }
   
@@ -402,12 +407,17 @@ STRICT JSON ONLY.`;
   
   console.log('AI periodization response:', text);
   
+  // Clean the response by removing markdown code blocks
+  const cleanedText = text.trim().replace(/^```json\s*/i, '').replace(/\s*```$/i, '').trim();
+  console.log('Cleaned AI response:', cleanedText);
+  
   let parsed;
   try {
-    parsed = JSON.parse(text);
+    parsed = JSON.parse(cleanedText);
   } catch (parseError) {
     console.error('Failed to parse AI periodization response:', parseError);
     console.error('Raw response:', text);
+    console.error('Cleaned response:', cleanedText);
     throw new Error(`AI periodization response was not valid JSON: ${parseError.message}`);
   }
   
