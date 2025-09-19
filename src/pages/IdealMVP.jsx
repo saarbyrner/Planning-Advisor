@@ -51,8 +51,8 @@ const IdealMVP = () => {
       
       // Generate the high-level plan with AI-determined schedule
       const planOptions = {
-        weeks: data.planDuration,
         startDate: data.startDate || new Date().toISOString().split('T')[0],
+        endDate: data.endDate,
         objective: `Focus on ${data.primaryFocus} (primary), ${data.secondaryFocus} (secondary), ${data.tertiaryFocus} (tertiary)`,
         userSelectedPrinciples: [data.primaryFocus, data.secondaryFocus, data.tertiaryFocus],
         variability: 'medium',
@@ -65,7 +65,7 @@ const IdealMVP = () => {
         planOptions.aiSchedule = data.aiSchedule;
       }
 
-      const plan = await generateHighLevelTeamPlan(data.teamId, planOptions);
+      const plan = await generateHighLevelTeamPlan(1, planOptions); // Use teamId 1 as default
 
       // Add our calculated percentages to the plan
       plan.principlePercentages = principlePercentages;
@@ -75,8 +75,14 @@ const IdealMVP = () => {
       setGeneratedPlan(plan);
       setCurrentStep(1);
       
+      // Calculate duration for plan name
+      const startDate = new Date(data.startDate);
+      const endDate = new Date(data.endDate);
+      const daysDiff = Math.ceil((endDate - startDate) / (1000 * 60 * 60 * 24)) + 1;
+      const weeks = Math.ceil(daysDiff / 7);
+      
       // Save the plan
-      await saveTeamPlan(data.teamId, plan, `${data.planDuration}-week ${data.primaryFocus} focus plan`);
+      await saveTeamPlan(1, plan, `${weeks}-week ${data.primaryFocus} focus plan`);
       
       setSnackbar({ 
         open: true, 

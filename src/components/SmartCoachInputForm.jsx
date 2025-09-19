@@ -27,12 +27,12 @@ import {
 
 const SmartCoachInputForm = ({ onGeneratePlan, loading = false }) => {
   const [formData, setFormData] = useState({
-    planDuration: 5,
+    startDate: new Date().toISOString().split('T')[0],
+    endDate: new Date(Date.now() + 35 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // 5 weeks from now
     primaryFocus: 'pressing',
     secondaryFocus: 'transition',
     tertiaryFocus: 'final-delivery',
-    sessionDuration: 60,
-    startDate: new Date().toISOString().split('T')[0]
+    sessionDuration: 60
   });
 
   const [aiSchedule, setAiSchedule] = useState(null);
@@ -74,13 +74,17 @@ const SmartCoachInputForm = ({ onGeneratePlan, loading = false }) => {
       rationale: ''
     };
 
-    // Calculate sessions based on plan duration
-    const weeks = requirements.planDuration;
+    // Calculate duration from date range
+    const startDate = new Date(requirements.startDate);
+    const endDate = new Date(requirements.endDate);
+    const daysDiff = Math.ceil((endDate - startDate) / (1000 * 60 * 60 * 24)) + 1;
+    const weeks = Math.ceil(daysDiff / 7);
+    
     const baseSessionsPerWeek = 3; // Standard 3 sessions per week
     const totalSessions = weeks * baseSessionsPerWeek;
     
     schedule.totalSessions = totalSessions;
-    schedule.rationale = `AI-generated ${weeks}-week plan with ${totalSessions} total sessions. Sessions are intelligently distributed for optimal learning and recovery.`;
+    schedule.rationale = `AI-generated ${weeks}-week plan (${daysDiff} days) with ${totalSessions} total sessions. Sessions are intelligently distributed for optimal learning and recovery.`;
 
     // Calculate intensity distribution based on focus areas
     const highIntensityRatio = requirements.primaryFocus === 'pressing' ? 0.4 : 0.3;
@@ -103,14 +107,18 @@ const SmartCoachInputForm = ({ onGeneratePlan, loading = false }) => {
         // After generating schedule, proceed with plan generation
         const planData = {
           ...formData,
-          aiSchedule: aiSchedule
+          aiSchedule: aiSchedule,
+          startDate: formData.startDate,
+          endDate: formData.endDate
         };
         onGeneratePlan(planData);
       });
     } else {
       const planData = {
         ...formData,
-        aiSchedule: aiSchedule
+        aiSchedule: aiSchedule,
+        startDate: formData.startDate,
+        endDate: formData.endDate
       };
       onGeneratePlan(planData);
     }
@@ -236,12 +244,23 @@ const SmartCoachInputForm = ({ onGeneratePlan, loading = false }) => {
               <Grid item xs={12} sm={6}>
                 <TextField
                   fullWidth
-                  label="Plan duration (weeks)"
-                  type="number"
-                  value={formData.planDuration}
-                  onChange={(e) => handleInputChange('planDuration', parseInt(e.target.value) || 0)}
-                  inputProps={{ min: 1, max: 12 }}
+                  label="Start Date"
+                  type="date"
+                  value={formData.startDate}
+                  onChange={(e) => handleInputChange('startDate', e.target.value)}
                   variant="outlined"
+                  InputLabelProps={{ shrink: true }}
+                />
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  fullWidth
+                  label="End Date"
+                  type="date"
+                  value={formData.endDate}
+                  onChange={(e) => handleInputChange('endDate', e.target.value)}
+                  variant="outlined"
+                  InputLabelProps={{ shrink: true }}
                 />
               </Grid>
             </Grid>
