@@ -80,10 +80,86 @@ function computeWeeklyMetrics(timeline) {
   return Object.values(weeks);
 }
 
-// Lightweight local summary generator (non-AI) to avoid blocking if model not used.
-// Builds a narrative summary + distilled principles list from timeline + fixtures.
+// AI-driven summary generator that creates intelligent periodization based on input parameters
 async function generateSummary(team, fixturesInRange, durationDescriptor, timeline, userObjective='') {
-  // Derive headline stats
+  const apiKey = getApiKey();
+  if (!apiKey || apiKey === 'your-gemini-api-key-here') {
+    // Fallback to basic summary if no API key
+    return generateBasicSummary(team, fixturesInRange, durationDescriptor, timeline, userObjective);
+  }
+
+  try {
+    const model = getGoogleAI()('models/gemini-1.5-flash-latest');
+    
+    // Build context for AI analysis
+    const totalMatches = fixturesInRange.length;
+    const weeks = [...new Set(timeline.map(d=>d.week_index))].length;
+    const highDays = timeline.filter(d=>d.load_class==='High').length;
+    const mediumDays = timeline.filter(d=>d.load_class==='Medium').length;
+    const lowRecovery = timeline.filter(d=>d.load_class==='Low' || d.load_class==='Recovery').length;
+    const phases = [...new Set(timeline.map(d=> d.mesocycle_phase))];
+    const firstDate = timeline[0]?.date;
+    const lastDate = timeline[timeline.length-1]?.date;
+    
+    // Create fixtures context
+    const fixturesContext = fixturesInRange.map(f => 
+      `${f.date}: ${f.home_team} vs ${f.away_team} (${f.competition})`
+    ).join(', ');
+
+    const prompt = `You are an elite soccer periodization coach. Analyze this training plan and create an intelligent summary.
+
+TEAM: ${team.name}
+DURATION: ${durationDescriptor} (${weeks} weeks from ${firstDate} to ${lastDate})
+USER OBJECTIVE: ${userObjective || 'General team development'}
+
+FIXTURES: ${fixturesContext || 'No matches scheduled'}
+
+PERIODIZATION STRUCTURE:
+- High intensity days: ${highDays}
+- Medium intensity days: ${mediumDays}  
+- Low/Recovery days: ${lowRecovery}
+- Mesocycle phases: ${phases.join(', ')}
+
+TIMELINE ANALYSIS:
+${timeline.map(day => 
+  `${day.date}: ${day.load_class} load, ${day.mesocycle_phase} phase${day.isFixture ? ` (MATCH: ${day.fixture?.opponent})` : ''}`
+).join('\n')}
+
+Create a professional periodization summary that:
+1. Explains the training philosophy and approach
+2. Justifies the load distribution based on fixtures and phases
+3. Highlights key training principles that align with the user's objectives
+4. Shows understanding of periodization science
+
+Return JSON format:
+{"summary": "Detailed periodization explanation...", "principles": ["Principle 1", "Principle 2", "Principle 3"]}
+
+Focus on the user's specific objectives: ${userObjective}`;
+
+    const { text } = await generateText({ model, prompt, maxTokens: 2000 });
+    
+    try {
+      const parsed = JSON.parse(text);
+      return {
+        summary: parsed.summary || 'AI-generated periodization plan',
+        principles: parsed.principles || []
+      };
+    } catch (parseError) {
+      // If JSON parsing fails, use the text as summary
+      return {
+        summary: text,
+        principles: []
+      };
+    }
+  } catch (error) {
+    console.error('AI summary generation failed:', error);
+    // Fallback to basic summary
+    return generateBasicSummary(team, fixturesInRange, durationDescriptor, timeline, userObjective);
+  }
+}
+
+// Fallback basic summary generator
+function generateBasicSummary(team, fixturesInRange, durationDescriptor, timeline, userObjective='') {
   const totalMatches = fixturesInRange.length;
   const weeks = [...new Set(timeline.map(d=>d.week_index))].length;
   const highDays = timeline.filter(d=>d.load_class==='High').length;
@@ -735,17 +811,45 @@ export async function generateSessionDrills(plan, sessionIndex, { useModelRefine
     const sessionLoad = session.overall_load;
     const principlesList = (session.principles_applied || []).join('; ');
     const phaseDescriptor = phasesForGen.map(p => ({ name: p.name, target_intensity: p.target_intensity||p.intensity||'Medium'}));
-    const prompt = `You are an elite soccer periodization coach. Create detailed drills for the following session.
-Session Load: ${sessionLoad}\nDate: ${session.date}\nSession Principles: ${principlesList}
-Phases (with desired target intensity hints): ${phaseDescriptor.map(p=>p.name+'('+p.target_intensity+')').join(', ')}
+    const prompt = `You are an elite soccer periodization coach. Create detailed, intelligent drills for this specific session.
+
+SESSION CONTEXT:
+- Date: ${session.date}
+- Overall Load: ${sessionLoad}
+- Mesocycle Phase: ${dayMeta?.mesocycle_phase || 'Unknown'}
+- Week Index: ${dayMeta?.week_index || 'Unknown'}
+- Match Day: ${dayMeta?.isFixture ? `YES - Match vs ${dayMeta.fixture?.opponent}` : 'NO'}
+
+TRAINING PRINCIPLES TO FOCUS ON:
+${principlesList || 'General team development'}
+
+PHASES TO CREATE DRILLS FOR:
+${phaseDescriptor.map(p=>`- ${p.name} (Target: ${p.target_intensity} intensity)`).join('\n')}
+
+PERIODIZATION INTELLIGENCE:
+- This is a ${sessionLoad} load session in the ${dayMeta?.mesocycle_phase || 'general'} phase
+- ${dayMeta?.isFixture ? 'This session must prepare for/reflect on the match' : 'This is a training day with no match'}
+- Consider the week's progression and overall periodization goals
+- Align drill complexity and intensity with the mesocycle phase
+
+Create drills that:
+1. Are SPECIFIC to this session's load and phase
+2. DIRECTLY support the training principles listed above
+3. Show PERIODIZATION INTELLIGENCE (not generic drills)
+4. Are PROGRESSIVE and CONTEXTUAL to the team's development phase
+5. Consider match preparation/recovery if applicable
+
 Return STRICT JSON only in this schema:
 {"phases":[{"phase":"Phase Name","drills":[{"name":"Drill Name","duration":10,"load":"Low|Medium|High","objective_primary":"Primary objective","objectives_secondary":["Secondary A","Secondary B"],"equipment":["Balls","Cones"],"coaching_points":["Coaching point 1"],"constraints":["Rule"],"progressions":["Progression"],"regressions":["Regression"],"players":{"arrangement":"Shape or numbers"},"space":{"dimensions":"Area dimensions"}}]}]}
+
 Guidelines:
-- 1–3 drills per phase depending on intensity (High up to 3, Low often 1-2).
-- Duration sum per phase should not exceed 35 minutes and be realistic vs intensity.
-- Use varied objectives (avoid repeating identical wording across drills).
-- Avoid unsafe instructions; no heading repetitions for youth excessively, no overtraining cues.
-- If a phase is Cool Down include recovery / down regulation focus.
+- 1–3 drills per phase depending on intensity (High up to 3, Low often 1-2)
+- Duration sum per phase should not exceed 35 minutes and be realistic vs intensity
+- Make drill names and objectives SPECIFIC to the training principles and periodization phase
+- Avoid generic drills - show coaching expertise and periodization knowledge
+- If a phase is Cool Down include recovery / down regulation focus
+- Consider the match context if this is a match day
+
 STRICT JSON ONLY.`;
     try {
       const { text } = await generateText({ model, prompt, maxTokens: 1400 });

@@ -10,7 +10,7 @@ import {
 } from '@mui/material';
 import { ArrowBackOutlined } from '@mui/icons-material';
 import SmartCoachInputForm from '../components/SmartCoachInputForm';
-import { generateHighLevelTeamPlan } from '../utils/generatePlan';
+import { generateTeamPlan } from '../utils/generatePlan';
 import { saveTeamPlan, getTeamFixtures } from '../utils/supabase';
 import { useNavigate } from 'react-router-dom';
 
@@ -47,13 +47,13 @@ const IdealMVP = ({ onBack }) => {
         userSelectedPrinciples: Object.entries(data.focusPercentages || {})
           .filter(([_, percentage]) => percentage > 0)
           .map(([principle, _]) => principle),
-        variability: 'medium',
-        generationMode: 'curated'
+        variability: 'medium', // Balanced variability for intelligent periodization
+        generationMode: 'generative' // Use AI to generate intelligent, parameter-driven drills
       };
 
       console.log('Generating plan with options:', planOptions);
 
-      const plan = await generateHighLevelTeamPlan(1, planOptions); // Use teamId 1 as default
+      const plan = await generateTeamPlan(1, planOptions); // Use teamId 1 as default - generates full plan with AI-created drills
 
       // Add our calculated percentages to the plan
       plan.principlePercentages = principlePercentages;

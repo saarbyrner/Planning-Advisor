@@ -40,7 +40,19 @@ const DrillEditModal = ({
 
   useEffect(() => {
     if (drill) {
-      setEditedDrill({ ...drill });
+      // Normalize array fields to ensure they are arrays
+      const normalizedDrill = {
+        ...drill,
+        equipment: Array.isArray(drill.equipment) ? drill.equipment : 
+                  (typeof drill.equipment === 'string' && drill.equipment.trim()) ? 
+                  drill.equipment.split(',').map(item => item.trim()) : [],
+        objectives_secondary: Array.isArray(drill.objectives_secondary) ? drill.objectives_secondary : [],
+        coaching_points: Array.isArray(drill.coaching_points) ? drill.coaching_points : [],
+        constraints: Array.isArray(drill.constraints) ? drill.constraints : [],
+        progressions: Array.isArray(drill.progressions) ? drill.progressions : [],
+        regressions: Array.isArray(drill.regressions) ? drill.regressions : []
+      };
+      setEditedDrill(normalizedDrill);
       setHasChanges(false);
       setErrors({});
     }
@@ -65,7 +77,7 @@ const DrillEditModal = ({
   const handleArrayFieldChange = (field, index, value) => {
     setEditedDrill(prev => ({
       ...prev,
-      [field]: prev[field].map((item, i) => i === index ? value : item)
+      [field]: (Array.isArray(prev[field]) ? prev[field] : []).map((item, i) => i === index ? value : item)
     }));
     setHasChanges(true);
   };
@@ -73,7 +85,7 @@ const DrillEditModal = ({
   const addArrayItem = (field) => {
     setEditedDrill(prev => ({
       ...prev,
-      [field]: [...(prev[field] || []), '']
+      [field]: [...(Array.isArray(prev[field]) ? prev[field] : []), '']
     }));
     setHasChanges(true);
   };
@@ -81,7 +93,7 @@ const DrillEditModal = ({
   const removeArrayItem = (field, index) => {
     setEditedDrill(prev => ({
       ...prev,
-      [field]: prev[field].filter((_, i) => i !== index)
+      [field]: (Array.isArray(prev[field]) ? prev[field] : []).filter((_, i) => i !== index)
     }));
     setHasChanges(true);
   };
@@ -277,7 +289,7 @@ const DrillEditModal = ({
                 <AddOutlined />
               </IconButton>
             </Box>
-            {(editedDrill.objectives_secondary || []).map((objective, index) => (
+            {(Array.isArray(editedDrill.objectives_secondary) ? editedDrill.objectives_secondary : []).map((objective, index) => (
               <Box key={index} sx={{ display: 'flex', gap: 1, mb: 1 }}>
                 <TextField
                   fullWidth
@@ -338,7 +350,7 @@ const DrillEditModal = ({
                 <AddOutlined />
               </IconButton>
             </Box>
-            {(editedDrill.equipment || []).map((item, index) => (
+            {(Array.isArray(editedDrill.equipment) ? editedDrill.equipment : []).map((item, index) => (
               <Box key={index} sx={{ display: 'flex', gap: 1, mb: 1 }}>
                 <TextField
                   fullWidth
@@ -375,7 +387,7 @@ const DrillEditModal = ({
                 <AddOutlined />
               </IconButton>
             </Box>
-            {(editedDrill.coaching_points || []).map((point, index) => (
+            {(Array.isArray(editedDrill.coaching_points) ? editedDrill.coaching_points : []).map((point, index) => (
               <Box key={index} sx={{ display: 'flex', gap: 1, mb: 1 }}>
                 <TextField
                   fullWidth
@@ -451,7 +463,7 @@ const DrillEditModal = ({
                 <AddOutlined />
               </IconButton>
             </Box>
-            {(editedDrill.constraints || []).map((constraint, index) => (
+            {(Array.isArray(editedDrill.constraints) ? editedDrill.constraints : []).map((constraint, index) => (
               <Box key={index} sx={{ display: 'flex', gap: 1, mb: 1 }}>
                 <TextField
                   fullWidth
@@ -488,7 +500,7 @@ const DrillEditModal = ({
                 <AddOutlined />
               </IconButton>
             </Box>
-            {(editedDrill.progressions || []).map((progression, index) => (
+            {(Array.isArray(editedDrill.progressions) ? editedDrill.progressions : []).map((progression, index) => (
               <Box key={index} sx={{ display: 'flex', gap: 1, mb: 1 }}>
                 <TextField
                   fullWidth
