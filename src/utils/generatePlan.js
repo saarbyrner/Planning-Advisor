@@ -133,7 +133,12 @@ Return JSON format:
 
 Focus on the user's specific objectives: ${userObjective}`;
 
-  const { text } = await generateText({ model, prompt, maxTokens: 3000 });
+  const { text } = await generateText({ 
+    model, 
+    prompt, 
+    maxTokens: 4000,
+    temperature: 0.9 // Higher creativity for more unique content
+  });
   
   const parsed = JSON.parse(text);
   return {
@@ -378,7 +383,12 @@ Return JSON format:
 
 STRICT JSON ONLY.`;
 
-  const { text } = await generateText({ model, prompt, maxTokens: 3000 });
+  const { text } = await generateText({ 
+    model, 
+    prompt, 
+    maxTokens: 4000,
+    temperature: 0.9 // Higher creativity for more unique content
+  });
   
   const parsed = JSON.parse(text);
   const loadDistribution = parsed.load_distribution || [];
