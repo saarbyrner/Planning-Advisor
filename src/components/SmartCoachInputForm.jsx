@@ -128,6 +128,16 @@ const SmartCoachInputForm = ({ onGeneratePlan, loading = false }) => {
     return focusOptions.find(opt => opt.value === focusValue)?.description || '';
   };
 
+  const calculateDateRangeInfo = () => {
+    const startDate = new Date(formData.startDate);
+    const endDate = new Date(formData.endDate);
+    const daysDiff = Math.ceil((endDate - startDate) / (1000 * 60 * 60 * 24)) + 1;
+    const weeks = Math.ceil(daysDiff / 7);
+    const days = daysDiff;
+    
+    return { days, weeks };
+  };
+
   return (
     <Card sx={{ 
       p: 4, 
@@ -264,6 +274,26 @@ const SmartCoachInputForm = ({ onGeneratePlan, loading = false }) => {
                 />
               </Grid>
             </Grid>
+
+            {/* Date Range Info */}
+            <Box sx={{ 
+              p: 2, 
+              backgroundColor: 'var(--color-background-primary)', 
+              borderRadius: 'var(--radius-md)',
+              border: '1px solid var(--color-border-primary)',
+              mb: 2
+            }}>
+              <Typography variant="body2" sx={{ 
+                color: 'var(--color-text-primary)',
+                fontWeight: 'var(--font-weight-medium)',
+                textAlign: 'center'
+              }}>
+                {(() => {
+                  const { days, weeks } = calculateDateRangeInfo();
+                  return `Selected period: ${days} days (${weeks} week${weeks !== 1 ? 's' : ''})`;
+                })()}
+              </Typography>
+            </Box>
 
             <Box sx={{ 
               p: 2, 
