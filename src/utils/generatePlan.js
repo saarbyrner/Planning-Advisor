@@ -347,7 +347,105 @@ function buildTimeline(team, fixtures, { weeks, startDate, endDate }) {
 }
 
 // Apply periodization immediately after building raw timeline (public helper if needed elsewhere)
-function assignPeriodizedLoads(timeline) {
+// AI-driven periodization that creates intelligent load distribution based on user parameters
+async function assignPeriodizedLoads(timeline, userObjective = '', userSelectedPrinciples = []) {
+  const apiKey = getApiKey();
+  if (!apiKey || apiKey === 'your-gemini-api-key-here') {
+    // Fallback to deterministic periodization if no API key
+    return assignPeriodizedLoadsDeterministic(timeline);
+  }
+
+  try {
+    const model = getGoogleAI()('models/gemini-1.5-flash-latest');
+    
+    // Build context for AI periodization
+    const fixtures = timeline.filter(d => d.isFixture);
+    const fixturesContext = fixtures.map(f => 
+      `${f.date}: vs ${f.fixture?.opponent} (${f.fixture?.competition || 'League'})`
+    ).join(', ');
+
+    const timelineContext = timeline.map((day, idx) => {
+      const fixtureInfo = day.isFixture ? ` (MATCH vs ${day.fixture?.opponent})` : '';
+      return `${idx + 1}. ${day.date}: ${day.mesocycle_phase} phase${fixtureInfo}`;
+    }).join('\n');
+
+    const prompt = `You are an elite soccer periodization coach. Create an intelligent training load distribution for this team.
+
+TEAM OBJECTIVE: ${userObjective || 'General team development'}
+FOCUS PRINCIPLES: ${userSelectedPrinciples.join(', ') || 'General development'}
+
+FIXTURES IN PERIOD:
+${fixturesContext || 'No matches scheduled'}
+
+CURRENT TIMELINE STRUCTURE:
+${timelineContext}
+
+Create an intelligent periodization that:
+1. RESPONDS to the team's specific objectives and focus principles
+2. OPTIMIZES load distribution around fixtures for peak performance
+3. SHOWS PERIODIZATION EXPERTISE (not generic patterns)
+4. CONSIDERS the mesocycle phases and development goals
+5. ADAPTS to fixture congestion and match importance
+
+For each training day, assign the most appropriate load class:
+- High: High intensity training, technical/tactical focus
+- Medium: Moderate intensity, skill development
+- Low: Light training, recovery focus
+- Recovery: Active recovery, regeneration
+- Off: Complete rest
+
+Return JSON format:
+{"load_distribution": [{"day_index": 0, "load_class": "High", "rationale": "Explanation for this load choice"}]}
+
+Guidelines:
+- Match days are always 'Match' load
+- Consider fixture proximity and importance
+- Align with the team's focus principles and objectives
+- Show periodization intelligence, not generic patterns
+- Provide rationale for each load decision
+
+STRICT JSON ONLY.`;
+
+    const { text } = await generateText({ model, prompt, maxTokens: 2000 });
+    
+    try {
+      const parsed = JSON.parse(text);
+      const loadDistribution = parsed.load_distribution || [];
+      
+      // Apply AI-generated load distribution
+      loadDistribution.forEach(({ day_index, load_class, rationale }) => {
+        if (timeline[day_index] && !timeline[day_index].isFixture) {
+          timeline[day_index].load_class = load_class;
+          timeline[day_index].color = LOAD_COLOR_MAP[load_class];
+          timeline[day_index].label = LOAD_LABEL_MAP[load_class];
+          timeline[day_index].ai_rationale = rationale;
+        }
+      });
+      
+      // Ensure match days are properly set
+      timeline.forEach(day => {
+        if (day.isFixture) {
+          day.load_class = 'Match';
+          day.color = LOAD_COLOR_MAP.Match;
+          day.label = LOAD_LABEL_MAP.Match + (day.fixture ? ` vs ${day.fixture.opponent}` : '');
+          day.md_label = 'MD';
+        }
+      });
+      
+    } catch (parseError) {
+      console.error('AI periodization parsing failed:', parseError);
+      // Fallback to deterministic
+      return assignPeriodizedLoadsDeterministic(timeline);
+    }
+  } catch (error) {
+    console.error('AI periodization generation failed:', error);
+    // Fallback to deterministic
+    return assignPeriodizedLoadsDeterministic(timeline);
+  }
+}
+
+// Fallback deterministic periodization (original logic)
+function assignPeriodizedLoadsDeterministic(timeline) {
   // Collect fixture indices sorted
   const fixtureIdxs = timeline.map((d,i)=> d.isFixture ? i : -1).filter(i=> i>=0).sort((a,b)=>a-b);
   function nextFixture(idx){ return fixtureIdxs.find(f=> f>idx); }
@@ -563,8 +661,8 @@ export async function generateHighLevelTeamPlan(teamId, weeksOrOptions = 5) {
   const endLimit = options.endDate || formatDate(options.startDate, (options.weeks || 1) * 7);
   const fixturesInRange = teamFixtures.filter(f => f.date >= options.startDate && f.date <= endLimit);
   const timeline = buildTimeline(team, fixturesInRange, options);
-  // Apply periodization layer (MD- tagging, load_class, week indices, mesocycle phases, metrics)
-  assignPeriodizedLoads(timeline);
+  // Apply AI-driven periodization layer based on user parameters
+  await assignPeriodizedLoads(timeline, options.objective, options.userSelectedPrinciples);
   const weekly_metrics = computeWeeklyMetrics(timeline);
   const durationDescriptor = options.endDate ? (timeline.length + '-day') : (options.weeks + '-week');
   let meta;
