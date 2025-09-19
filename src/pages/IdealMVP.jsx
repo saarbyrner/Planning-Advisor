@@ -21,17 +21,16 @@ import {
   ScheduleOutlined
 } from '@mui/icons-material';
 import SmartCoachInputForm from '../components/SmartCoachInputForm';
-import SimplifiedSessionDisplay from '../components/SimplifiedSessionDisplay';
-import { generateHighLevelTeamPlan, generateSessionDrills } from '../utils/generatePlan';
+import { generateHighLevelTeamPlan } from '../utils/generatePlan';
 import { saveTeamPlan } from '../utils/supabase';
+import { useNavigate } from 'react-router-dom';
 
 const IdealMVP = () => {
+  const navigate = useNavigate();
   const [currentStep, setCurrentStep] = useState(0);
   const [formData, setFormData] = useState(null);
   const [generatedPlan, setGeneratedPlan] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [selectedSession, setSelectedSession] = useState(0);
-  const [regenerating, setRegenerating] = useState(false);
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
 
   const steps = [
@@ -84,14 +83,24 @@ const IdealMVP = () => {
       const daysDiff = Math.ceil((endDate - startDate) / (1000 * 60 * 60 * 24)) + 1;
       const weeks = Math.ceil(daysDiff / 7);
       
-      // Save the plan
-      await saveTeamPlan(1, plan, `${weeks}-week ${data.primaryFocus} focus plan`);
+      // Get the primary focus area for naming
+      const primaryFocus = Object.entries(data.focusPercentages || {})
+        .filter(([_, percentage]) => percentage > 0)
+        .sort(([_, a], [__, b]) => b - a)[0]?.[0] || 'training';
+      
+      // Save the plan and get the plan ID
+      const savedPlan = await saveTeamPlan(1, plan, `${weeks}-week ${primaryFocus} focus plan`);
       
       setSnackbar({ 
         open: true, 
-        message: 'Training plan generated successfully!', 
+        message: 'Training plan generated successfully! Redirecting to plan view...', 
         severity: 'success' 
       });
+      
+      // Redirect to team planning page with the saved plan
+      setTimeout(() => {
+        navigate(`/team-periodization?planId=${savedPlan.id}`);
+      }, 1500);
     } catch (error) {
       console.error('Error generating plan:', error);
       setSnackbar({ 
@@ -121,29 +130,6 @@ const IdealMVP = () => {
   };
 
 
-  const handleRegenerateSession = async (sessionIndex) => {
-    if (!generatedPlan) return;
-    
-    setRegenerating(true);
-    try {
-      await generateSessionDrills(generatedPlan, sessionIndex, { variability: 'medium' });
-      setGeneratedPlan({ ...generatedPlan });
-      setSnackbar({ 
-        open: true, 
-        message: `Session ${sessionIndex + 1} regenerated!`, 
-        severity: 'success' 
-      });
-    } catch (error) {
-      console.error('Error regenerating session:', error);
-      setSnackbar({ 
-        open: true, 
-        message: 'Failed to regenerate session.', 
-        severity: 'error' 
-      });
-    } finally {
-      setRegenerating(false);
-    }
-  };
 
 
   const handleNext = () => {
@@ -165,16 +151,13 @@ const IdealMVP = () => {
         );
       case 1:
         return (
-          <Box sx={{ maxWidth: 1200, mx: 'auto' }}>
-            {generatedPlan?.sessions && (
-              <SimplifiedSessionDisplay 
-                sessions={generatedPlan.sessions}
-                selectedSession={selectedSession}
-                onSessionSelect={setSelectedSession}
-                onRegenerateSession={handleRegenerateSession}
-                regenerating={regenerating}
-              />
-            )}
+          <Box sx={{ maxWidth: 1200, mx: 'auto', textAlign: 'center', py: 8 }}>
+            <Typography variant="h5" sx={{ mb: 2, color: 'var(--color-text-primary)' }}>
+              Plan Generated Successfully!
+            </Typography>
+            <Typography variant="body1" sx={{ color: 'var(--color-text-secondary)' }}>
+              Redirecting you to the full team planning interface...
+            </Typography>
           </Box>
         );
       default:
