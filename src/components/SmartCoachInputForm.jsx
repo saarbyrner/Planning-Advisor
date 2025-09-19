@@ -142,34 +142,6 @@ const SmartCoachInputForm = ({ onGeneratePlan, loading = false }) => {
       </Box>
 
       <Grid container spacing={3}>
-        {/* Plan Duration */}
-        <Grid item xs={12}>
-          <Paper sx={{ p: 3, backgroundColor: 'var(--color-background-secondary)' }}>
-            <Typography variant="h6" sx={{ 
-              mb: 2, 
-              display: 'flex', 
-              alignItems: 'center', 
-              gap: 1,
-              color: 'var(--color-text-primary)'
-            }}>
-              <ScheduleOutlined />
-              Plan Duration
-            </Typography>
-            <Grid container spacing={2}>
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  fullWidth
-                  label="Plan duration (weeks)"
-                  type="number"
-                  value={formData.planDuration}
-                  onChange={(e) => handleInputChange('planDuration', parseInt(e.target.value) || 0)}
-                  inputProps={{ min: 1, max: 12 }}
-                  variant="outlined"
-                />
-              </Grid>
-            </Grid>
-          </Paper>
-        </Grid>
 
         {/* Learning Focus */}
         <Grid item xs={12}>
@@ -259,6 +231,20 @@ const SmartCoachInputForm = ({ onGeneratePlan, loading = false }) => {
               <CalendarTodayOutlined />
               AI Schedule Preview
             </Typography>
+            
+            <Grid container spacing={2} sx={{ mb: 2 }}>
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  fullWidth
+                  label="Plan duration (weeks)"
+                  type="number"
+                  value={formData.planDuration}
+                  onChange={(e) => handleInputChange('planDuration', parseInt(e.target.value) || 0)}
+                  inputProps={{ min: 1, max: 12 }}
+                  variant="outlined"
+                />
+              </Grid>
+            </Grid>
             
             <Alert severity="info" sx={{ mb: 2 }}>
               <Typography variant="body2">
