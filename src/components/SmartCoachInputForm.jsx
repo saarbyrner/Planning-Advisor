@@ -189,18 +189,25 @@ const SmartCoachInputForm = ({ onGeneratePlan, loading = false }) => {
   };
 
   const handleGenerate = () => {
+    // Auto-generate AI schedule if not already done
     if (!aiSchedule) {
-      alert('Please generate the AI schedule first by clicking "Generate AI Schedule"');
-      return;
+      generateAiSchedule().then(() => {
+        // After generating schedule, proceed with plan generation
+        const planData = {
+          ...formData,
+          aiSchedule: aiSchedule,
+          fixtures: fixtures
+        };
+        onGeneratePlan(planData);
+      });
+    } else {
+      const planData = {
+        ...formData,
+        aiSchedule: aiSchedule,
+        fixtures: fixtures
+      };
+      onGeneratePlan(planData);
     }
-    
-    const planData = {
-      ...formData,
-      aiSchedule: aiSchedule,
-      fixtures: fixtures
-    };
-    
-    onGeneratePlan(planData);
   };
 
   const getFocusDescription = (focusValue) => {
@@ -219,19 +226,12 @@ const SmartCoachInputForm = ({ onGeneratePlan, loading = false }) => {
     }}>
       <Box sx={{ textAlign: 'center', mb: 4 }}>
         <AutoAwesomeOutlined sx={{ fontSize: 48, color: 'var(--color-primary)', mb: 2 }} />
-        <Typography variant="h4" sx={{ 
+        <Typography variant="h6" sx={{ 
           fontWeight: 'var(--font-weight-semibold)',
           color: 'var(--color-text-primary)',
           mb: 1
         }}>
           AI-Powered Training Plan
-        </Typography>
-        <Typography variant="body1" sx={{ 
-          color: 'var(--color-text-secondary)',
-          maxWidth: 600,
-          mx: 'auto'
-        }}>
-          Tell us your focus areas and let AI determine the optimal training schedule based on your fixtures.
         </Typography>
       </Box>
 
@@ -355,89 +355,42 @@ const SmartCoachInputForm = ({ onGeneratePlan, loading = false }) => {
           </Paper>
         </Grid>
 
-        {/* AI Schedule Generation */}
-        <Grid item xs={12}>
-          <Paper sx={{ p: 3, backgroundColor: 'var(--color-background-secondary)' }}>
-            <Typography variant="h6" sx={{ 
-              mb: 2, 
-              display: 'flex', 
-              alignItems: 'center', 
-              gap: 1,
-              color: 'var(--color-text-primary)'
-            }}>
-              <CalendarTodayOutlined />
-              AI-Generated Training Schedule
-            </Typography>
-            
-            {fixtures.length > 0 ? (
+        {/* AI Schedule Preview */}
+        {fixtures.length > 0 && (
+          <Grid item xs={12}>
+            <Paper sx={{ p: 3, backgroundColor: 'var(--color-background-secondary)' }}>
+              <Typography variant="h6" sx={{ 
+                mb: 2, 
+                display: 'flex', 
+                alignItems: 'center', 
+                gap: 1,
+                color: 'var(--color-text-primary)'
+              }}>
+                <CalendarTodayOutlined />
+                AI Schedule Preview
+              </Typography>
+              
               <Alert severity="info" sx={{ mb: 2 }}>
-                Found {fixtures.length} fixtures for this team. AI will determine optimal training schedule.
-              </Alert>
-            ) : (
-              <Alert severity="warning" sx={{ mb: 2 }}>
-                No fixtures found for this team. AI will use default schedule.
-              </Alert>
-            )}
-
-            <Box sx={{ textAlign: 'center', mb: 2 }}>
-              <Button
-                variant="contained"
-                onClick={generateAiSchedule}
-                disabled={loadingFixtures}
-                startIcon={loadingFixtures ? <CircularProgress size={20} /> : <AutoAwesomeOutlined />}
-                sx={{
-                  backgroundColor: 'var(--color-primary)',
-                  color: 'var(--color-white)',
-                  '&:hover': { backgroundColor: 'var(--color-primary-hover)' },
-                  px: 4,
-                  py: 1.5,
-                  textTransform: 'none',
-                  fontWeight: 'var(--font-weight-medium)'
-                }}
-              >
-                {loadingFixtures ? 'Analyzing Fixtures...' : 'Generate AI Schedule'}
-              </Button>
-            </Box>
-
-            {showAiSchedule && aiSchedule && (
-              <Box sx={{ mt: 3 }}>
-                <Typography variant="subtitle1" sx={{ mb: 2, fontWeight: 'var(--font-weight-medium)' }}>
-                  AI-Determined Schedule:
+                <Typography variant="body2">
+                  <strong>Found {fixtures.length} fixtures</strong> for this team. 
+                  AI will automatically adjust training sessions based on match schedule.
                 </Typography>
-                <Grid container spacing={2}>
-                  <Grid item xs={12} sm={4}>
-                    <Paper sx={{ p: 2, textAlign: 'center' }}>
-                      <Typography variant="h4" sx={{ color: 'var(--color-primary)' }}>
-                        {aiSchedule.totalSessions}
-                      </Typography>
-                      <Typography variant="body2">Total Sessions</Typography>
-                    </Paper>
-                  </Grid>
-                  <Grid item xs={12} sm={4}>
-                    <Paper sx={{ p: 2, textAlign: 'center' }}>
-                      <Typography variant="h4" sx={{ color: 'var(--color-primary)' }}>
-                        {aiSchedule.intensityDistribution.high}
-                      </Typography>
-                      <Typography variant="body2">High Intensity</Typography>
-                    </Paper>
-                  </Grid>
-                  <Grid item xs={12} sm={4}>
-                    <Paper sx={{ p: 2, textAlign: 'center' }}>
-                      <Typography variant="h4" sx={{ color: 'var(--color-primary)' }}>
-                        {aiSchedule.intensityDistribution.medium}
-                      </Typography>
-                      <Typography variant="body2">Medium Intensity</Typography>
-                    </Paper>
-                  </Grid>
-                </Grid>
-                
-                <Typography variant="body2" sx={{ mt: 2, fontStyle: 'italic', color: 'var(--color-text-secondary)' }}>
-                  {aiSchedule.rationale}
+              </Alert>
+
+              <Box sx={{ 
+                p: 2, 
+                backgroundColor: 'var(--color-background-primary)', 
+                borderRadius: 'var(--radius-md)',
+                border: '1px solid var(--color-border-primary)'
+              }}>
+                <Typography variant="body2" sx={{ color: 'var(--color-text-secondary)' }}>
+                  <strong>How it works:</strong> AI analyzes your fixtures and determines the optimal number of training sessions per week. 
+                  Heavy fixture weeks get fewer sessions, light weeks get more development time.
                 </Typography>
               </Box>
-            )}
-          </Paper>
-        </Grid>
+            </Paper>
+          </Grid>
+        )}
 
         {/* Generate Button */}
         <Grid item xs={12}>
@@ -447,8 +400,8 @@ const SmartCoachInputForm = ({ onGeneratePlan, loading = false }) => {
               variant="contained"
               size="large"
               onClick={handleGenerate}
-              disabled={loading || !aiSchedule}
-              startIcon={<PlayArrowOutlined />}
+              disabled={loading}
+              startIcon={loading ? <CircularProgress size={20} /> : <PlayArrowOutlined />}
               sx={{
                 backgroundColor: 'var(--color-primary)',
                 color: 'var(--color-white)',
@@ -461,14 +414,14 @@ const SmartCoachInputForm = ({ onGeneratePlan, loading = false }) => {
                 borderRadius: 'var(--radius-md)'
               }}
             >
-              {loading ? 'Generating Your Plan...' : 'Generate Training Plan'}
+              {loading ? 'AI is Creating Your Plan...' : 'Generate AI Training Plan'}
             </Button>
             <Typography variant="caption" sx={{ 
               display: 'block', 
               mt: 2, 
               color: 'var(--color-text-secondary)' 
             }}>
-              {aiSchedule ? `AI will create a ${formData.planDuration}-week plan with ${aiSchedule.totalSessions} sessions` : 'Generate AI schedule first'}
+              AI will analyze fixtures and create a {formData.planDuration}-week training plan focused on your priorities
             </Typography>
           </Box>
         </Grid>

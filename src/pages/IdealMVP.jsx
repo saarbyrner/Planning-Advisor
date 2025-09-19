@@ -246,23 +246,6 @@ const IdealMVP = () => {
 
   return (
     <Container maxWidth="xl" sx={{ py: 4 }}>
-      {/* Header */}
-      <Box sx={{ textAlign: 'center', mb: 4 }}>
-        <Typography variant="h3" sx={{ 
-          fontWeight: 'var(--font-weight-bold)',
-          color: 'var(--color-text-primary)',
-          mb: 2
-        }}>
-          Training Plan Generator
-        </Typography>
-        <Typography variant="h6" sx={{ 
-          color: 'var(--color-text-secondary)',
-          maxWidth: 600,
-          mx: 'auto'
-        }}>
-          Create personalized training plans with clear focus areas and expected outcomes
-        </Typography>
-      </Box>
 
       {/* Progress Stepper */}
       <Box sx={{ mb: 4 }}>
