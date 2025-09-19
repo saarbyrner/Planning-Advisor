@@ -245,12 +245,6 @@ const SmartCoachInputForm = ({ onGeneratePlan, loading = false }) => {
                 />
               </Grid>
             </Grid>
-            
-            <Alert severity="info" sx={{ mb: 2 }}>
-              <Typography variant="body2">
-                <strong>{formData.planDuration}-week training plan</strong> will be generated with AI-optimized session scheduling.
-              </Typography>
-            </Alert>
 
             <Box sx={{ 
               p: 2, 
