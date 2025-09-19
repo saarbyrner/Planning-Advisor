@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
-import { Box, Button, Card, Typography, Tab, Tabs, Select, MenuItem, FormControl, InputLabel, Accordion, AccordionSummary, AccordionDetails, TextField, Drawer, IconButton, Grid, Paper, Chip, Tooltip, Dialog, DialogTitle, DialogContent, DialogActions } from '@mui/material';
+import { Box, Button, Card, Typography, Tab, Tabs, Select, MenuItem, Menu, FormControl, InputLabel, Accordion, AccordionSummary, AccordionDetails, TextField, Drawer, IconButton, Grid, Paper, Chip, Tooltip, Dialog, DialogTitle, DialogContent, DialogActions } from '@mui/material';
 import ExpandMoreOutlinedIcon from '@mui/icons-material/ExpandMoreOutlined';
 import EditOutlinedIcon from '@mui/icons-material/EditOutlined';
 import CloseOutlinedIcon from '@mui/icons-material/CloseOutlined';
@@ -8,8 +8,9 @@ import AssessmentOutlinedIcon from '@mui/icons-material/AssessmentOutlined';
 import SettingsOutlinedIcon from '@mui/icons-material/SettingsOutlined';
 import squads from '../data/squads_teams.json'; // Add this import for team data
 import games from '../data/games_matches.json';
-import { BarChart } from '@mui/x-charts/BarChart'; // Fallback to BarChart if Gantt requires Pro
-import { generateHighLevelTeamPlan, generateSessionDrills, regenerateSession, generateTeamPlan } from '../utils/generatePlan';
+import { BarChart } from '@mui/x-charts/BarChart'; // Existing usage
+import { LineChart } from '@mui/x-charts/LineChart';
+import { generateHighLevelTeamPlan, generateSessionDrills, regenerateSession, generateTeamPlan, updateDayLoad, markSessionNameEdited } from '../utils/generatePlan';
 import { computePlanAnalytics } from '../utils/analytics';
 import { saveTeamPlan, getTeamPlans, getAllTeamPlans, getTeamFixtures } from '../utils/supabase'; // Add import for new functions
 import { useSearchParams } from 'react-router-dom';
@@ -45,6 +46,8 @@ function TeamPeriodization({ onHeaderControlsChange }) {
   const tabsRef = useRef(null);
   const [openReport, setOpenReport] = useState(false);
   const [openSettings, setOpenSettings] = useState(false); // State for settings dialog
+  const [loadEditAnchor, setLoadEditAnchor] = useState(null); // anchor for per-day load edit menu
+  const [loadEditDayIndex, setLoadEditDayIndex] = useState(null);
   // Settings state
   const [settings, setSettings] = useState(() => {
     try {
@@ -714,16 +717,27 @@ function TeamPeriodization({ onHeaderControlsChange }) {
                             padding: '4px 0'
                           }}>
                             {day.isFixture && (
-                              <Box sx={{ 
-                                position: 'absolute', 
-                                top: 4, 
-                                right: 4, 
-                                width: 8, 
-                                height: 8, 
-                                borderRadius: '50%', 
-                                backgroundColor: '#1976d2', 
-                                boxShadow: '0 0 0 2px rgba(0,0,0,0.15)' 
-                              }} />
+                              <Tooltip title={`Match ${day.fixture?.match_number || ''} • Importance ${(day.fixture?.importance_weight||1).toFixed(2)}`} arrow>
+                                <Box sx={{
+                                  position:'absolute',
+                                  top:4,
+                                  right:4,
+                                  px:0.5,
+                                  minWidth:20,
+                                  height:18,
+                                  borderRadius:'10px',
+                                  display:'flex',
+                                  alignItems:'center',
+                                  justifyContent:'center',
+                                  fontSize:'10px',
+                                  fontWeight:600,
+                                  background: (day.fixture?.importance_weight||1) > 1.3 ? 'linear-gradient(90deg,#8e24aa,#d81b60)' : (day.fixture?.importance_weight||1) > 1.15 ? '#1976d2' : '#455a64',
+                                  color:'#fff',
+                                  boxShadow:'0 0 0 2px rgba(0,0,0,0.15)'
+                                }}>
+                                  {day.fixture?.match_number || 'M'}
+                                </Box>
+                              </Tooltip>
                             )}
                             <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 0.25 }}>
                               <Typography variant="caption" sx={{ 
@@ -751,43 +765,38 @@ function TeamPeriodization({ onHeaderControlsChange }) {
                                 {monthName}
                               </Typography>
                             </Box>
-                            <Tooltip title={day.isFixture ? day.label : undefined} arrow disableInteractive>
-                              <Chip 
-                                size="small" 
+                            <Tooltip title={(() => {
+                              if (day.isFixture) return day.label;
+                              const base = day.md_label ? `${day.md_label}${day.mesocycle_phase? ' • '+day.mesocycle_phase:''}` : (day.mesocycle_phase||'');
+                              // If upcoming fixture high importance and within 3 days, append importance flag
+                              const upcoming = plan.timeline.find(d2 => d2.isFixture && new Date(d2.date) >= new Date(day.date));
+                              if (upcoming && upcoming.fixture?.importance_weight > 1.15) {
+                                const diff = (new Date(upcoming.date) - new Date(day.date))/86400000;
+                                if (diff > 0 && diff <=3) return base + ` • Targeting High-Importance Match (Iw ${(upcoming.fixture.importance_weight).toFixed(2)})`;
+                              }
+                              return base;
+                            })()} arrow disableInteractive>
+                              <Chip
+                                size="small"
+                                onClick={(e)=> { if(!day.isFixture){ setLoadEditAnchor(e.currentTarget); setLoadEditDayIndex(index);} }}
                                 label={day.isFixture ? (day.fixture?.opponent || day.label.replace(/Match vs\s*/i,'').split('(')[0].trim()) : (
-                                  day.label.includes('High') ? 'High' : 
-                                  day.label.includes('Medium') ? 'Medium' : 
-                                  day.label.includes('Low') ? 'Low' : 
-                                  day.label.includes('Recovery') ? 'Recovery' : 'Day'
-                                )} 
+                                  day.load_class || (day.label.includes('High') ? 'High' : day.label.includes('Medium') ? 'Medium' : day.label.includes('Low') ? 'Low' : day.label.includes('Recovery') ? 'Recovery' : 'Load')
+                                )}
                                 variant="filled"
-                                sx={{ 
-                                height: 20, 
-                                fontSize: '10px', 
-                                fontWeight: 'var(--font-weight-medium)',
-                                backgroundColor: day.color === 'red' ? 'var(--color-error,#d32f2f)' :
-                                               day.color === 'yellow' ? 'var(--color-warning,#ed6c02)' :
-                                               day.color === 'green' ? 'var(--color-success,#2e7d32)' :
-                                               day.color === 'purple' ? '#6a1b9a' : 
-                                               day.label.includes('Recovery') ? '#4caf50' : 'var(--color-primary,#1976d2)',
-                                color: (day.color === 'yellow' || day.label.includes('Recovery')) ? 'var(--color-text-primary)' : 'var(--color-white)',
-                                border: 'none',
-                                boxShadow: 'none',
-                                '& .MuiChip-label': {
-                                  px: 1.5,
-                                  py: 0.5
-                                },
-                                '& .MuiChip-deleteIcon': {
-                                  display: 'none'
-                                },
-                                '& .MuiChip-avatar': {
-                                  display: 'none'
-                                },
-                                '& .MuiChip-icon': {
-                                  display: 'none'
-                                },
-                                marginTop: '2px'
-                                }} 
+                                sx={{
+                                  height: 22,
+                                  cursor: day.isFixture? 'default':'pointer',
+                                  fontSize: '10px',
+                                  fontWeight: 'var(--font-weight-medium)',
+                                  backgroundColor: day.color === 'red' ? 'var(--color-error,#d32f2f)' :
+                                                 day.color === 'yellow' ? 'var(--color-warning,#ed6c02)' :
+                                                 day.color === 'green' ? 'var(--color-success,#2e7d32)' :
+                                                 day.color === 'purple' ? '#6a1b9a' : 'var(--color-primary,#1976d2)',
+                                  color: (day.color === 'yellow') ? 'var(--color-text-primary)' : 'var(--color-white)',
+                                  border: 'none',
+                                  boxShadow: 'none',
+                                  '& .MuiChip-label': { px: 1.25, py: 0.5 }
+                                }}
                               />
                             </Tooltip>
                           </Box>
@@ -1180,6 +1189,67 @@ function TeamPeriodization({ onHeaderControlsChange }) {
           {!analytics && (<Typography variant="body2">Generate drills to populate analytics.</Typography>)}
           {analytics && (
             <Box sx={{ display:'flex', flexDirection:'column', gap:4 }}>
+              {/* Load Undulation Visuals */}
+              <Box>
+                <Typography variant="h6" sx={{ mb:1, fontSize:'14px' }}>Load Undulation</Typography>
+                <Typography variant="caption" color="text.secondary" sx={{ display:'block', mb:2 }}>
+                  Visualizing daily and weekly training load to evidence periodized variation (reducing monotony & supporting peak readiness).
+                </Typography>
+                {(() => {
+                  if (!plan?.timeline) return <Typography variant="caption">No timeline data.</Typography>;
+                  const scoreMap = { High:3, Medium:2, Low:1, Recovery:0.5, Off:0, Match:3.5 };
+                  const daily = plan.timeline.map((d, i) => ({
+                    id: i+1,
+                    day: `D${i+1}`,
+                    date: d.date,
+                    load_class: d.load_class || (d.isFixture? 'Match': 'Unknown'),
+                    score: scoreMap[d.load_class || (d.isFixture? 'Match': 'Low')] ?? 1,
+                    meso: d.mesocycle_phase,
+                    md: d.md_label || ''
+                  }));
+                  return (
+                    <Box sx={{ display:'flex', flexDirection:'column', gap:3 }}>
+                      <Box sx={{ width:'100%', overflowX:'auto' }}>
+                        <BarChart
+                          dataset={daily}
+                          xAxis={[{ scaleType:'band', dataKey:'day', label:'Day', tickLabelStyle:{ fontSize:10 } }]}
+                          yAxis={[{ label:'Load Score', tickLabelStyle:{ fontSize:10 } }]}
+                          height={180}
+                          series={[{ dataKey:'score', label:'Daily Load', color:'#1976d2' }]}
+                          tooltip={{ trigger:'item', formatter:(item)=> {
+                            const row = item?.data || {};
+                            return `${row.date}\n${row.load_class}${row.md? ' ('+row.md+')':''}${row.meso? ' • '+row.meso:''} -> ${row.score}`;
+                          }}}
+                        />
+                      </Box>
+                      <Box>
+                        {plan.weekly_metrics && plan.weekly_metrics.length>0 ? (
+                          <LineChart
+                            height={220}
+                            xAxis={[{ data: plan.weekly_metrics.map(w=> w.week_index+1), label:'Week', tickLabelStyle:{ fontSize:10 } }]}
+                            yAxis={[
+                              { id:'load', label:'Weekly Load', tickLabelStyle:{ fontSize:10 } },
+                              { id:'strain', label:'Strain', position:'right', tickLabelStyle:{ fontSize:10 } }
+                            ]}
+                            series={[
+                              { id:'total_load', label:'Total Load', data: plan.weekly_metrics.map(w=> Number(w.total_load.toFixed(1))), color:'#0288d1', yAxisKey:'load', area:true },
+                              { id:'strain', label:'Strain', data: plan.weekly_metrics.map(w=> w.strain), color:'#ef6c00', yAxisKey:'strain' }
+                            ]}
+                            slotProps={{ legend:{ direction:'horizontal', position:{ vertical:'top', horizontal:'start' }, padding:0 } }}
+                            tooltip={{ trigger:'item', formatter:(item)=> {
+                              const idx = item.dataIndex;
+                              const w = plan.weekly_metrics[idx];
+                              return `Week ${w.week_index+1} (${w.flag_monotony} monotony)\nTotal Load: ${w.total_load.toFixed(1)}\nMean: ${w.mean.toFixed(2)} SD: ${w.sd.toFixed(2)}\nMonotony: ${w.monotony} • Strain: ${w.strain}`;
+                            }}}
+                          />
+                        ) : (
+                          <Typography variant="caption">Weekly metrics not available.</Typography>
+                        )}
+                      </Box>
+                    </Box>
+                  );
+                })()}
+              </Box>
               <Box sx={{ display:'flex', flexWrap:'wrap', gap:3 }}>
                 <Box>
                   <Typography variant="overline" sx={{ fontSize:10 }}>SESSIONS</Typography>
@@ -1403,6 +1473,24 @@ function TeamPeriodization({ onHeaderControlsChange }) {
           {snackbar.message}
         </Alert>
       </Snackbar>
+      {/* Load Edit Menu */}
+      <Menu
+        anchorEl={loadEditAnchor}
+        open={Boolean(loadEditAnchor)}
+        onClose={()=> { setLoadEditAnchor(null); setLoadEditDayIndex(null); }}
+        MenuListProps={{ dense:true }}
+      >
+        {['High','Medium','Low','Recovery','Off'].map(lc => (
+          <MenuItem key={lc} onClick={()=> {
+            if (plan && loadEditDayIndex!=null) {
+              updateDayLoad(plan, loadEditDayIndex, lc, { invalidateDrills: true });
+              setPlan({ ...plan, timeline:[...plan.timeline], sessions:[...plan.sessions] });
+              setSnackbar({ open:true, message:`Day ${loadEditDayIndex+1} set to ${lc}`, severity:'info'});
+            }
+            setLoadEditAnchor(null); setLoadEditDayIndex(null);
+          }}>{lc}</MenuItem>
+        ))}
+      </Menu>
     </Box>
   );
 }

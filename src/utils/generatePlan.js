@@ -10,6 +10,132 @@ import enrichedDrills from '../data/drills_enriched.json';
 import legacyDrills from '../data/drills.json';
 import principlesData from '../data/principles_of_play.json';
 
+// ---------------------- PERIODIZATION ENHANCEMENTS ----------------------
+// New concepts added for more practitioner-realistic planning:
+// 1. MD- / MD+ patterning around fixtures (Match Day minus X)
+// 2. Weekly mesocycle phase tagging (Accumulation / Intensification / Taper / Transition)
+// 3. Load classification separate from legacy color mapping (load_class)
+// 4. Weekly load metrics (simple arbitrary load scores) + monotony & strain indicators
+// 5. User overrides (UI can edit daily load classification and regenerate skeleton)
+// -------------------------------------------------------------------------
+
+// Mapping helpers
+const LOAD_COLOR_MAP = {
+  Match: 'purple',
+  High: 'red',
+  Medium: 'yellow',
+  Low: 'green',
+  Recovery: 'green',
+  Off: 'grey'
+};
+
+const LOAD_LABEL_MAP = {
+  Match: 'Match Day',
+  High: 'High Intensity Training',
+  Medium: 'Medium Load Training',
+  Low: 'Low Load Training',
+  Recovery: 'Recovery & Regeneration',
+  Off: 'Rest / Off Feet'
+};
+
+// Mesocycle phases (simplistic default for up to 6 weeks)
+function mesocyclePhase(weekIdx) {
+  if (weekIdx <= 1) return 'Accumulation';
+  if (weekIdx <= 3) return 'Intensification';
+  if (weekIdx === 4) return 'Taper';
+  if (weekIdx === 5) return 'Transition';
+  return 'Maintenance';
+}
+
+
+function weekIndexFromDate(startDateStr, dateStr) {
+  const s = new Date(startDateStr);
+  const d = new Date(dateStr);
+  return Math.floor((d - s)/86400000 / 7); // zero-based
+}
+
+// Compute weekly load metrics (arbitrary scoring): High=3, Medium=2, Low=1, Recovery=0.5, Off=0, Match=3.5
+function computeWeeklyMetrics(timeline) {
+  const scoreMap = { High:3, Medium:2, Low:1, Recovery:0.5, Off:0, Match:3.5 };
+  const weeks = {};
+  timeline.forEach(d => {
+    const w = d.week_index || 0;
+    if (!weeks[w]) weeks[w] = { week_index:w, days:[], total_load:0 };
+    const score = scoreMap[d.load_class] ?? 1;
+    weeks[w].days.push({ date:d.date, load_class:d.load_class, score });
+    weeks[w].total_load += score;
+  });
+  // Monotony = mean / SD; Strain = total_load * monotony (Foster method approximation)
+  Object.values(weeks).forEach(w => {
+    const scores = w.days.map(x=>x.score);
+    const mean = scores.reduce((a,b)=>a+b,0)/scores.length;
+    const variance = scores.reduce((a,b)=> a + Math.pow(b-mean,2),0)/scores.length;
+    const sd = Math.sqrt(variance) || 0.0001;
+    const monotony = mean / sd;
+    const strain = w.total_load * monotony;
+    w.mean = mean; w.sd = sd; w.monotony = Number(monotony.toFixed(2)); w.strain = Number(strain.toFixed(2));
+    w.flag_monotony = monotony > 2 ? 'High' : monotony > 1.5 ? 'Moderate' : 'OK';
+    w.flag_strain = strain > 160 ? 'High' : strain > 120 ? 'Moderate' : 'OK';
+  });
+  return Object.values(weeks);
+}
+
+// Lightweight local summary generator (non-AI) to avoid blocking if model not used.
+// Builds a narrative summary + distilled principles list from timeline + fixtures.
+async function generateSummary(team, fixturesInRange, durationDescriptor, timeline, userObjective='') {
+  // Derive headline stats
+  const totalMatches = fixturesInRange.length;
+  const weeks = [...new Set(timeline.map(d=>d.week_index))].length;
+  const highDays = timeline.filter(d=>d.load_class==='High').length;
+  const mediumDays = timeline.filter(d=>d.load_class==='Medium').length;
+  const lowRecovery = timeline.filter(d=>d.load_class==='Low' || d.load_class==='Recovery').length;
+  const phases = [...new Set(timeline.map(d=> d.mesocycle_phase))];
+  const firstDate = timeline[0]?.date;
+  const lastDate = timeline[timeline.length-1]?.date;
+  const importanceAvg = (()=>{ const imps = timeline.filter(d=>d.isFixture).map(d=> d.fixture?.importance_weight||1); return imps.length? (imps.reduce((a,b)=>a+b,0)/imps.length).toFixed(2):'1.00'; })();
+
+  const objectiveClause = userObjective ? ` Objective focus: ${userObjective}.` : '';
+  const matchClause = totalMatches>0 ? `${totalMatches} match${totalMatches>1?'es':''}` : 'no matches';
+  const phaseClause = phases.length ? `Phases traversed: ${phases.join(', ')}.` : '';
+
+  const summary = `Generated a ${durationDescriptor} plan (${weeks} week span) from ${firstDate} to ${lastDate} featuring ${matchClause}. High-load days: ${highDays}, medium: ${mediumDays}, low/recovery: ${lowRecovery}. Avg match importance weighting ${importanceAvg}. ${phaseClause}${objectiveClause}`.replace(/\s+/g,' ').trim();
+
+  // Extract principle emphasis heuristically from load distribution & MD labels
+  const principlePool = principlesData.principles_of_play;
+  function pick(cat, nameStarts){
+    const list = principlePool[cat]||[];
+    return list.find(p=> nameStarts.some(ns=> p.name.startsWith(ns)))?.name || (list[0]?.name);
+  }
+  const principles = [
+    pick('attacking',['Penetration','Support']),
+    pick('attacking',['Mobility','Width']),
+    pick('defending',['Pressure','Compactness']),
+    pick('transition',['Transition to Attack','Transition to Defend'])
+  ].filter(Boolean);
+
+  return { summary, principles };
+}
+
+// Determine focus principles (higher-level emphasis) either from user selection or heuristic based on load distribution.
+function deriveFocusPrinciples(userSelected = []) {
+  const pool = principlesData.principles_of_play;
+  if (userSelected && userSelected.length) {
+    // Return validated names only
+    const flat = Object.values(pool).flat();
+    return userSelected.filter(sel => flat.some(p => p.name === sel)).slice(0,6);
+  }
+  // Heuristic: pick 2 attacking, 2 defending, 2 transition if available
+  function pick(cat, count){
+    const arr = (pool[cat]||[]).slice(0,count).map(p=>p.name);
+    return arr;
+  }
+  return [
+    ...pick('attacking',2),
+    ...pick('defending',2),
+    ...pick('transition',2)
+  ].filter(Boolean);
+}
+
 // Backward-compatible per-athlete plan (returns text) used by existing UI (App.jsx)
 export async function generatePlan(athlete, profile, fixtures, metrics) {
   const apiKey = getApiKey();
@@ -77,6 +203,20 @@ function buildTimeline(team, fixtures, { weeks, startDate, endDate }) {
     // Only set first occurrence for a date (ignore duplicates for now)
     if (key && !fixtureMap.has(key)) fixtureMap.set(key, f);
   });
+  // Pre-compute basic relative importance for fixtures (simple heuristic: competition tier + stage keywords)
+  const importanceScores = new Map();
+  fixtures.forEach(f => {
+    const comp = (f.competition || '').toLowerCase();
+    let score = 1; // baseline league
+    if (/semi|quarter|final/.test(comp)) score += 0.4;
+    if (/cup|champions|playoff|knockout/.test(comp)) score += 0.3;
+    if (/friendly|preseason/.test(comp)) score -= 0.3;
+    if (/relegation|derby|rival/.test((f.notes||'').toLowerCase())) score += 0.2;
+    if (score < 0.6) score = 0.6;
+    importanceScores.set(f, Number(score.toFixed(2)));
+  });
+  let matchCounter = 0;
+
   const timeline = dates.map((d, idx) => {
     const iso = d.toISOString().split('T')[0];
     let fixture = fixtureMap.get(iso);
@@ -105,6 +245,9 @@ function buildTimeline(team, fixtures, { weeks, startDate, endDate }) {
       const compShort = competition ? (competition.length > 18 ? competition.split(' ').map(w=>w[0]).join('').toUpperCase() : competition) : '';
       label = `Match vs ${opponent}${compShort ? ' ('+compShort+')':''}`;
       isFixture = true;
+      matchCounter += 1;
+      const importance_weight = importanceScores.get(fixture) || 1;
+      fixture.__meta = { match_number: matchCounter, importance_weight };
     } else {
       // Weekly micro-cycle based on position from start
       const micro = (idx % 7) + 1;
@@ -119,70 +262,101 @@ function buildTimeline(team, fixtures, { weeks, startDate, endDate }) {
     return { day: idx + 1, date: iso, color, label, isFixture, fixture: fixture ? {
       opponent: (fixture.home_team||fixture.home) === team.name ? (fixture.away_team || fixture.away || fixture.opponent) : (fixture.home_team || fixture.home || fixture.opponent),
       home: (fixture.home_team||fixture.home) === team.name,
+      importance_weight: fixture.__meta?.importance_weight || 1,
+      match_number: fixture.__meta?.match_number || null,
       raw: fixture
     } : null };
   });
   return timeline;
 }
 
-// Extended to optionally incorporate a user-defined objective focus statement.
-async function generateSummary(team, fixtures, durationDescriptor, timeline, objective) {
-  const taxonomy = principlesData.principles_of_play;
-  const attackingList = taxonomy.attacking.map(p => p.name).join('; ');
-  const defendingList = taxonomy.defending.map(p => p.name).join('; ');
-  const transitionList = taxonomy.transition.map(p => p.name).join('; ');
-  const prompt = `You are a performance periodization expert.
-You have the following PRINCIPLES OF PLAY taxonomy.
-Attacking: ${attackingList}
-Defending: ${defendingList}
-Transition: ${transitionList}
-Return ONLY JSON with keys summary and principles.
-summary: 1-2 paragraphs describing the ${durationDescriptor} plan structure for ${team.name} referencing fixture congestion, recovery strategy, and load distribution, and explicitly stating how selected principles from the taxonomy are emphasized.${objective ? ' Integrate this specific coaching objective: "'+objective.replace(/"/g,'\"')+'" (rephrase naturally).' : ''}
-principles: semicolon delimited list (Attacking/Defending/Transition mix) of 5-9 core principles chosen from the taxonomy above (use exact names, no new ones).
-NO markdown, ONLY compact JSON object like {"summary":"...","principles":"Penetration; Support; Pressure; Cover; Transition to Attack (Positive Transition); ..."}`;
-  const { text } = await generateText({
-    model: getGoogleAI()('models/gemini-1.5-flash-latest'),
-    prompt,
-    maxTokens: 800
+// Apply periodization immediately after building raw timeline (public helper if needed elsewhere)
+function assignPeriodizedLoads(timeline) {
+  // Collect fixture indices sorted
+  const fixtureIdxs = timeline.map((d,i)=> d.isFixture ? i : -1).filter(i=> i>=0).sort((a,b)=>a-b);
+  function nextFixture(idx){ return fixtureIdxs.find(f=> f>idx); }
+  function currentOrPrevFixture(idx){ let r; for (const f of fixtureIdxs){ if (f<=idx) r=f; else break; } return r; }
+
+  // Calendar weekday fallback pattern (if no surrounding fixture): Mon High, Tue Medium, Wed High, Thu Medium, Fri Low, Sat Low/Activation, Sun Recovery
+  function weekdayFallback(dateStr){
+    const d = new Date(dateStr).getUTCDay(); // 0 Sun .. 6 Sat
+    switch(d){
+      case 1: return 'High'; // Mon
+      case 2: return 'Medium'; // Tue
+      case 3: return 'High'; // Wed
+      case 4: return 'Medium'; // Thu
+      case 5: return 'Low'; // Fri
+      case 6: return 'Low'; // Sat
+      case 0: return 'Recovery'; // Sun
+      default: return 'Medium';
+    }
+  }
+
+  timeline.forEach((day, idx) => {
+    if (day.isFixture){
+      day.load_class='Match';
+      day.color=LOAD_COLOR_MAP.Match;
+      day.label = LOAD_LABEL_MAP.Match + (day.fixture? ` vs ${day.fixture.opponent}`:'');
+      day.md_label='MD';
+      return;
+    }
+    const prevFix = currentOrPrevFixture(idx);
+    const nextFix = nextFixture(idx);
+    let mdLabel = null;
+    if (typeof nextFix === 'number'){
+      const until = nextFix - idx; if (until>=1 && until<=6) mdLabel = 'MD-'+until;
+    }
+    if (!mdLabel && typeof prevFix === 'number'){
+      const after = idx - prevFix; if (after>=1 && after<=3) mdLabel = 'MD+'+after; // extend to +3 for medium reload
+    }
+    let loadClass;
+    // Updated MD template (common pro week): MD-5 High, MD-4 High, MD-3 Medium, MD-2 Medium (tactical), MD-1 Low/Recovery.
+    // Importance-aware taper: if upcoming match importance_weight > 1.15, make MD-2 Low and MD-1 Recovery.
+    const upcomingImportance = (typeof nextFix==='number' && timeline[nextFix]?.fixture?.importance_weight) || 1;
+    switch(mdLabel){
+      case 'MD-6': loadClass='High'; break;
+      case 'MD-5': loadClass='High'; break;
+      case 'MD-4': loadClass='High'; break;
+      case 'MD-3': loadClass='Medium'; break;
+      case 'MD-2': loadClass= upcomingImportance>1.15 ? 'Low':'Medium'; break;
+      case 'MD-1': loadClass= upcomingImportance>1.15 ? 'Recovery':'Low'; break;
+      case 'MD+1': loadClass='Recovery'; break;
+      case 'MD+2': loadClass='Low'; break;
+      case 'MD+3': loadClass='Medium'; break;
+    }
+    // Handle fixture congestion (two matches <=72h apart): compress pattern High removed, emphasize Recovery + Medium only.
+    if (typeof prevFix==='number' && typeof nextFix==='number' && (nextFix - prevFix) <= 3){
+      if (!day.isFixture){
+        if (idx === prevFix+1) loadClass='Recovery';
+        else if (idx === nextFix-1) loadClass='Low';
+        else loadClass='Medium';
+      }
+    }
+    if (!loadClass){
+      loadClass = weekdayFallback(day.date);
+    }
+
+    day.load_class = loadClass;
+    day.color = LOAD_COLOR_MAP[loadClass] || day.color;
+    if (day.fixture?.match_number) {
+      // Ensure match days keep match label; training days adapt to load
+      if (loadClass !== 'Match') day.label = LOAD_LABEL_MAP[loadClass];
+    } else {
+      day.label = LOAD_LABEL_MAP[loadClass];
+    }
+    day.md_label = mdLabel;
   });
-  try {
-    const cleaned = text.trim().replace(/^```json|```$/g, '');
-    return JSON.parse(cleaned);
-  } catch {
-    return { summary: text.slice(0, 500), principles: '' };
-  }
-}
 
-// Derive a constrained focus principles subset (week-level) – 2 Attacking, 2 Defending, 1 Transition by default
-function deriveFocusPrinciples(userSelectedPrinciples) {
-  const p = principlesData.principles_of_play;
-  // Categorize user-selected principles if provided
-  if (Array.isArray(userSelectedPrinciples) && userSelectedPrinciples.length) {
-    const byCat = { attacking: [], defending: [], transition: [] };
-    const lookup = {
-      attacking: new Set(p.attacking.map(x => x.name)),
-      defending: new Set(p.defending.map(x => x.name)),
-      transition: new Set(p.transition.map(x => x.name))
-    };
-    userSelectedPrinciples.forEach(name => {
-      if (lookup.attacking.has(name)) byCat.attacking.push(name);
-      else if (lookup.defending.has(name)) byCat.defending.push(name);
-      else if (lookup.transition.has(name)) byCat.transition.push(name);
-    });
-    return byCat;
-  }
-  function pick(list, n) { return list.slice(0, n).map(x => x.name); }
-  return {
-    attacking: pick(p.attacking, 2),
-    defending: pick(p.defending, 2),
-    transition: pick(p.transition, 1)
-  };
+  timeline.forEach(d => {
+    const w = weekIndexFromDate(timeline[0].date, d.date);
+    d.week_index = w;
+    d.mesocycle_phase = mesocyclePhase(w);
+  });
+  return timeline;
 }
-
-// Helper to derive a high-level session skeleton deterministically (no model call) based on load & fixture status.
+// Re-introduced after refactor: map session load to applied principles.
 function mapSessionPrinciples(loadLabel, isFixture) {
   const p = principlesData.principles_of_play;
-  // helper: pick by names
   function find(cat, name) { return p[cat].find(x => x.name.startsWith(name))?.name || name; }
   if (isFixture) {
     return [
@@ -212,7 +386,7 @@ function mapSessionPrinciples(loadLabel, isFixture) {
       find('transition','Transition to Defend (Negative Transition)')
     ];
   }
-  // Low / recovery
+  // Low / Recovery
   return [
     find('defending','Control/Restraint'),
     find('defending','Compactness'),
@@ -238,8 +412,9 @@ function deriveSessionSkeleton(dayMeta) {
       drills_generated: false
     };
   }
-  const color = dayMeta.color;
-  let loadLabel = color === 'red' ? 'High' : color === 'yellow' ? 'Medium' : 'Low';
+  // Prefer explicit periodized load_class if present
+  let loadLabel = dayMeta.load_class || (dayMeta.color === 'red' ? 'High' : dayMeta.color === 'yellow' ? 'Medium' : 'Low');
+  if (loadLabel === 'Recovery') loadLabel = 'Low'; // Map recovery to low for skeleton differentiation (phases still lighter)
   // Dynamic phase templates: always warm & cool; variable number of core blocks (Technical/Tactical/Transition blend)
   const coreBlocks = [];
   if (loadLabel === 'High') {
@@ -312,9 +487,26 @@ export async function generateHighLevelTeamPlan(teamId, weeksOrOptions = 5) {
   const endLimit = options.endDate || formatDate(options.startDate, (options.weeks || 1) * 7);
   const fixturesInRange = teamFixtures.filter(f => f.date >= options.startDate && f.date <= endLimit);
   const timeline = buildTimeline(team, fixturesInRange, options);
+  // Apply periodization layer (MD- tagging, load_class, week indices, mesocycle phases, metrics)
+  assignPeriodizedLoads(timeline);
+  const weekly_metrics = computeWeeklyMetrics(timeline);
   const durationDescriptor = options.endDate ? (timeline.length + '-day') : (options.weeks + '-week');
-  const meta = await generateSummary(team, fixturesInRange, durationDescriptor, timeline, options.objective);
-  const focus_principles = deriveFocusPrinciples(options.userSelectedPrinciples);
+  let meta;
+  try {
+    meta = await generateSummary(team, fixturesInRange, durationDescriptor, timeline, options.objective);
+  } catch (e) {
+    meta = { summary: 'Summary generation failed (fallback).', principles: [] };
+  }
+  let focus_principles = [];
+  try { focus_principles = deriveFocusPrinciples(options.userSelectedPrinciples); } catch { focus_principles = []; }
+  const matches = timeline.filter(d=> d.isFixture).map(d => ({
+    date: d.date,
+    opponent: d.fixture?.opponent,
+    home: d.fixture?.home,
+    match_number: d.fixture?.match_number,
+    importance_weight: d.fixture?.importance_weight,
+    competition: d.fixture?.raw?.competition || d.fixture?.raw?.competition_name || '',
+  }));
   return {
     summary: meta.summary,
     principles: meta.principles,
@@ -322,13 +514,15 @@ export async function generateHighLevelTeamPlan(teamId, weeksOrOptions = 5) {
     focus_principles,
     timeline,
     sessions: timeline.map(deriveSessionSkeleton),
+    matches,
     generated_at: new Date().toISOString(),
     team: team.name,
     weeks: options.weeks || null,
     start_date: options.startDate,
     end_date: options.endDate || null,
     total_days: timeline.length,
-    warnings: [],
+    weekly_metrics,
+    warnings: weekly_metrics.some(w=> w.flag_monotony==='High') ? ['High weekly monotony detected – consider inserting an additional variation / recovery day.'] : [],
     settings: {
       variability: options.variability || 'medium',
       objective: options.objective || '',
@@ -726,11 +920,18 @@ STRICT JSON ONLY.`;
   const coreEnriched = Object.entries(coreDrillMap).reduce((acc,[phaseName,list]) => { acc[phaseName] = enrichDrillList(list, phaseName); return acc; }, {});
 
   // Build rationale referencing plan principles & session load
-  const globalPrinciples = plan.principles || '';
+  const rawPrinciples = plan.principles || [];
+  const principleArr = Array.isArray(rawPrinciples)
+    ? rawPrinciples
+    : (typeof rawPrinciples === 'string'
+        ? rawPrinciples.split(/;|,/).map(s=>s.trim()).filter(Boolean)
+        : []);
   function phaseRationale(phaseName) {
-    if (phaseName === 'Warm Up') return 'Progressive neuromuscular activation aligned with session load ' + load + '. ' + globalPrinciples.split(';')[0]?.trim();
-    if (phaseName === 'Technical') return 'Technical quality under appropriate tempo scaling for ' + load + ' load day.';
-    if (phaseName === 'Tactical') return 'Applied tactical theme reflecting weekly periodization & principles: ' + globalPrinciples.split(';').slice(0,2).join(';');
+    const first = principleArr[0] || '';
+    const firstTwo = principleArr.slice(0,2).join('; ');
+    if (phaseName === 'Warm Up') return `Progressive neuromuscular activation aligned with ${load} load${first?'. '+first:''}`.trim();
+    if (phaseName === 'Technical') return `Technical quality & execution under appropriate tempo for a ${load} day.`;
+    if (phaseName === 'Tactical') return `Applied tactical theme reflecting periodization${firstTwo? ' & principles: '+firstTwo:''}`.trim();
     if (phaseName === 'Cool Down') return 'Down-regulation and recovery facilitation to consolidate adaptations.';
     return 'Phase emphasis aligned with session objectives.';
   }
@@ -854,8 +1055,14 @@ export async function generateTeamPlan(teamId, weeksOrOptions = 5) {
   const durationDescriptor = options.endDate ? (totalDays + '-day') : (options.weeks + '-week');
 
   // 2. Generate summary/principles
-  const meta = await generateSummary(team, fixturesInRange, durationDescriptor, timeline, options.objective);
-  const focus_principles = deriveFocusPrinciples(options.userSelectedPrinciples);
+  let meta;
+  try {
+    meta = await generateSummary(team, fixturesInRange, durationDescriptor, timeline, options.objective);
+  } catch (e) {
+    meta = { summary: 'Summary generation failed (fallback).', principles: [] };
+  }
+  let focus_principles = [];
+  try { focus_principles = deriveFocusPrinciples(options.userSelectedPrinciples); } catch { focus_principles = []; }
 
   // 3. Generate sessions sequentially (could be parallel but keep token moderation & ordering)
   // Use new skeleton derivation then populate drills (legacy behavior) sequentially
@@ -882,6 +1089,14 @@ export async function generateTeamPlan(teamId, weeksOrOptions = 5) {
     focus_principles,
     timeline,
     sessions,
+    matches: timeline.filter(d=> d.isFixture).map(d => ({
+      date: d.date,
+      opponent: d.fixture?.opponent,
+      home: d.fixture?.home,
+      match_number: d.fixture?.match_number,
+      importance_weight: d.fixture?.importance_weight,
+      competition: d.fixture?.raw?.competition || d.fixture?.raw?.competition_name || ''
+    })),
     generated_at: new Date().toISOString(),
     team: team.name,
     weeks: options.weeks || null,
@@ -896,4 +1111,36 @@ export async function generateTeamPlan(teamId, weeksOrOptions = 5) {
       generationMode: options.generationMode || 'curated' // Ensure included in legacy return path
     }
   };
+}
+
+// ----------------- USER OVERRIDE UTILITIES -----------------
+// Allow UI to change a day's load_class then rebuild its session skeleton (and optionally invalidate drills)
+export function updateDayLoad(plan, dayIndex, newLoadClass, { invalidateDrills = true } = {}) {
+  if (!plan || !plan.timeline || !plan.timeline[dayIndex]) return plan;
+  const day = plan.timeline[dayIndex];
+  day.load_class = newLoadClass;
+  day.color = LOAD_COLOR_MAP[newLoadClass] || day.color;
+  day.label = LOAD_LABEL_MAP[newLoadClass] || day.label;
+  // Regenerate session skeleton preserving date & match status
+  const newSkeleton = deriveSessionSkeleton({ ...day, color: day.color, isFixture: day.isFixture });
+  const existing = plan.sessions[dayIndex];
+  if (existing) {
+    // Replace only high-level fields; keep name if user edited
+    const preservedName = existing.userRenamed ? existing.name : newSkeleton.name;
+    plan.sessions[dayIndex] = { ...newSkeleton, name: preservedName };
+  } else {
+    plan.sessions[dayIndex] = newSkeleton;
+  }
+  if (invalidateDrills && plan.sessions[dayIndex]) {
+    plan.sessions[dayIndex].drills_generated = false;
+    plan.sessions[dayIndex].phases.forEach(p => { delete p.drills; });
+  }
+  // Recompute weekly metrics since load distribution changed
+  plan.weekly_metrics = computeWeeklyMetrics(plan.timeline);
+  return plan;
+}
+
+export function markSessionNameEdited(plan, sessionIndex) {
+  if (plan?.sessions?.[sessionIndex]) plan.sessions[sessionIndex].userRenamed = true;
+  return plan;
 }

@@ -5,24 +5,13 @@ import SimplePage from './pages/SimplePage'
 import Athletes from './pages/Athletes'
 import TeamPeriodization from './pages/TeamPeriodization';
 import PlanManagement from './pages/PlanManagement';
-import { useState, useEffect, useRef } from 'react';
-import { AthleteDataGrid, Button, Card } from './components';
-import { getAthletes, getFixtures, getPerformance, savePlan } from './utils/supabase';
-import { generatePlan } from './utils/generatePlan';
+import WorkloadPage from './pages/WorkloadPage';
+import { useState, useEffect } from 'react';
+import { AthleteDataGrid } from './components';
 
 function App() {
-  const [athletes, setAthletes] = useState([]);
-  const [selectedPlan, setSelectedPlan] = useState('');
   const [headerControls, setHeaderControls] = useState(null);
   const location = useLocation();
-
-  useEffect(() => {
-    async function fetchData() {
-      const data = await getAthletes();
-      setAthletes(data);
-    }
-    fetchData();
-  }, []);
 
   // Clear header controls when navigating away from team-planning
   useEffect(() => {
@@ -30,14 +19,6 @@ function App() {
       setHeaderControls(null);
     }
   }, [location.pathname]);
-
-  const handleGenerate = async (athlete) => {
-    const fixtures = await getFixtures(athlete.id);
-    const performance = await getPerformance(athlete.id);
-    const plan = await generatePlan(athlete, athlete.profile, fixtures, performance[0]?.metrics || {});
-    setSelectedPlan(plan);
-    await savePlan(athlete.id, plan);
-  };
 
   return (
     <LayoutWithMainNav headerControls={headerControls}>
@@ -48,7 +29,7 @@ function App() {
         <Route path="/medical" element={<SimplePage pageName="Medical" />} />
         <Route path="/analysis" element={<SimplePage pageName="Analysis" />} />
         <Route path="/athlete" element={<Athletes />} />
-        <Route path="/workloads" element={<SimplePage pageName="Workload" />} />
+        <Route path="/workloads" element={<WorkloadPage />} />
         <Route path="/questionnaires" element={<SimplePage pageName="Forms" />} />
         <Route path="/planning" element={<SimplePage pageName="Calendar" />} />
         <Route path="/activity" element={<SimplePage pageName="Activity log" />} />
@@ -60,14 +41,6 @@ function App() {
   </ErrorBoundary>
       {/* Temporarily comment out AthleteDataGrid to avoid MUI license warnings */}
       {/* {location.pathname !== '/team-planning' && <AthleteDataGrid athletes={athletes} />} */}
-      {location.pathname === '/workloads' && (
-        <>
-          {athletes.map(athlete => (
-            <Button key={athlete.id} onClick={() => handleGenerate(athlete)}>Generate Plan for {athlete.name}</Button>
-          ))}
-          {selectedPlan && <Card>{selectedPlan}</Card>}
-        </>
-      )}
     </LayoutWithMainNav>
   )
 }
