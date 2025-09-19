@@ -59,15 +59,16 @@ export async function saveTeamPlan(teamId, plan, title = null) {
     durationDays = plan.sessions.length;
   }
 
-  const { error } = await supabase.from('team_plans').insert({ 
+  const { data, error } = await supabase.from('team_plans').insert({ 
     team_id: teamId, 
     plan: JSON.stringify(plan),
     title: finalTitle,
   start_date: startDate,
   end_date: endDate,
     duration_days: durationDays
-  });
+  }).select();
   if (error) throw error;
+  return data[0];
 }
 
 export async function getTeamPlans(teamId) {

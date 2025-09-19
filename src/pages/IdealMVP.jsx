@@ -91,6 +91,8 @@ const IdealMVP = () => {
       // Save the plan and get the plan ID
       const savedPlan = await saveTeamPlan(1, plan, `${weeks}-week ${primaryFocus} focus plan`);
       
+      console.log('Saved plan:', savedPlan); // Debug log
+      
       setSnackbar({ 
         open: true, 
         message: 'Training plan generated successfully! Redirecting to plan view...', 
@@ -99,6 +101,7 @@ const IdealMVP = () => {
       
       // Redirect to team planning page with the saved plan
       setTimeout(() => {
+        console.log('Redirecting to:', `/team-periodization?planId=${savedPlan.id}`); // Debug log
         navigate(`/team-periodization?planId=${savedPlan.id}`);
       }, 1500);
     } catch (error) {
