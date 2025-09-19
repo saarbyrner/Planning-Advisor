@@ -92,6 +92,17 @@ const IdealMVP = () => {
       const savedPlan = await saveTeamPlan(1, plan, `${weeks}-week ${primaryFocus} focus plan`);
       
       console.log('Saved plan:', savedPlan); // Debug log
+      console.log('Saved plan ID:', savedPlan?.id); // Debug log
+      
+      if (!savedPlan || !savedPlan.id) {
+        console.error('No plan ID returned from saveTeamPlan');
+        setSnackbar({ 
+          open: true, 
+          message: 'Plan saved but could not redirect. Please navigate manually.', 
+          severity: 'warning' 
+        });
+        return;
+      }
       
       setSnackbar({ 
         open: true, 
@@ -101,8 +112,18 @@ const IdealMVP = () => {
       
       // Redirect to team planning page with the saved plan
       setTimeout(() => {
-        console.log('Redirecting to:', `/team-periodization?planId=${savedPlan.id}`); // Debug log
-        navigate(`/team-periodization?planId=${savedPlan.id}`);
+        const redirectUrl = `/team-planning?planId=${savedPlan.id}`;
+        console.log('Redirecting to:', redirectUrl); // Debug log
+        console.log('Current location:', window.location.href); // Debug log
+        
+        try {
+          navigate(redirectUrl);
+          console.log('Navigate called successfully');
+        } catch (navError) {
+          console.error('Navigation error:', navError);
+          // Fallback to window.location
+          window.location.href = redirectUrl;
+        }
       }, 1500);
     } catch (error) {
       console.error('Error generating plan:', error);
