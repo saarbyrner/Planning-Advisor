@@ -11,11 +11,9 @@ export { default as PlayerAvatar } from './PlayerAvatar'
 export { default as LogoImage } from './LogoImage'
 export { default as MainNavigation } from './MainNavigation'
 export { default as AthleteDataGrid } from './AthleteDataGrid'
-export { default as CoachInputForm } from './CoachInputForm'
 export { default as SmartCoachInputForm } from './SmartCoachInputForm'
 export { default as PrincipleBreakdown } from './PrincipleBreakdown'
 export { default as SimplifiedSessionDisplay } from './SimplifiedSessionDisplay'
-export { default as QuickTemplates } from './QuickTemplates'
 
 // Usage Examples:
 // import { Button, Icon, Card, PlayerAvatar, LogoImage } from '../components'

@@ -20,11 +20,9 @@ import {
   TrendingUpOutlined,
   ScheduleOutlined
 } from '@mui/icons-material';
-import CoachInputForm from '../components/CoachInputForm';
 import SmartCoachInputForm from '../components/SmartCoachInputForm';
 import PrincipleBreakdown from '../components/PrincipleBreakdown';
 import SimplifiedSessionDisplay from '../components/SimplifiedSessionDisplay';
-import QuickTemplates from '../components/QuickTemplates';
 import { generateHighLevelTeamPlan, generateSessionDrills } from '../utils/generatePlan';
 import { saveTeamPlan } from '../utils/supabase';
 
@@ -36,8 +34,6 @@ const IdealMVP = () => {
   const [selectedSession, setSelectedSession] = useState(0);
   const [regenerating, setRegenerating] = useState(false);
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
-  const [showTemplates, setShowTemplates] = useState(false);
-  const [useSmartInput, setUseSmartInput] = useState(true);
 
   const steps = [
     { label: 'Set Requirements', icon: <SportsSoccerOutlined /> },
@@ -160,12 +156,6 @@ const IdealMVP = () => {
     }
   };
 
-  const handleTemplateSelect = (templateConfig) => {
-    setFormData(templateConfig);
-    setShowTemplates(false);
-    // Auto-generate plan with template
-    handleGeneratePlan(templateConfig);
-  };
 
   const handleNext = () => {
     setCurrentStep(prev => Math.min(prev + 1, steps.length - 1));
@@ -178,18 +168,8 @@ const IdealMVP = () => {
   const renderStepContent = () => {
     switch (currentStep) {
       case 0:
-        if (showTemplates) {
-          return (
-            <QuickTemplates onSelectTemplate={handleTemplateSelect} />
-          );
-        }
-        return useSmartInput ? (
+        return (
           <SmartCoachInputForm 
-            onGeneratePlan={handleGeneratePlan}
-            loading={loading}
-          />
-        ) : (
-          <CoachInputForm 
             onGeneratePlan={handleGeneratePlan}
             loading={loading}
           />
@@ -306,44 +286,6 @@ const IdealMVP = () => {
 
       {/* Step Content */}
       <Box sx={{ mb: 4 }}>
-        {currentStep === 0 && (
-          <Box sx={{ textAlign: 'center', mb: 3 }}>
-            <Box sx={{ display: 'flex', gap: 2, justifyContent: 'center', flexWrap: 'wrap' }}>
-              <Button
-                variant={showTemplates ? "outlined" : "contained"}
-                onClick={() => setShowTemplates(!showTemplates)}
-                sx={{
-                  backgroundColor: showTemplates ? 'transparent' : 'var(--color-primary)',
-                  color: showTemplates ? 'var(--color-primary)' : 'white',
-                  borderColor: 'var(--color-primary)',
-                  '&:hover': {
-                    backgroundColor: showTemplates ? 'var(--color-primary-light)' : 'var(--color-primary-hover)',
-                    color: 'white'
-                  }
-                }}
-              >
-                {showTemplates ? 'Custom Plan' : 'Quick Templates'}
-              </Button>
-              {!showTemplates && (
-                <Button
-                  variant={useSmartInput ? "contained" : "outlined"}
-                  onClick={() => setUseSmartInput(!useSmartInput)}
-                  sx={{
-                    backgroundColor: useSmartInput ? 'var(--color-success)' : 'transparent',
-                    color: useSmartInput ? 'white' : 'var(--color-success)',
-                    borderColor: 'var(--color-success)',
-                    '&:hover': {
-                      backgroundColor: useSmartInput ? 'var(--color-success-dark)' : 'var(--color-success-light)',
-                      color: 'white'
-                    }
-                  }}
-                >
-                  {useSmartInput ? 'AI Schedule' : 'Manual Input'}
-                </Button>
-              )}
-            </Box>
-          </Box>
-        )}
         {renderStepContent()}
       </Box>
 
