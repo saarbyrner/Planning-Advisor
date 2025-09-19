@@ -314,15 +314,9 @@ function buildTimeline(team, fixtures, { weeks, startDate, endDate }) {
       const importance_weight = importanceScores.get(fixture) || 1;
       fixture.__meta = { match_number: matchCounter, importance_weight };
     } else {
-      // Weekly micro-cycle based on position from start
-      const micro = (idx % 7) + 1;
-      if (micro === 1 || micro === 3 || micro === 5) {
-        color = 'red'; label = 'High Intensity Training';
-      } else if (micro === 2 || micro === 4) {
-        color = 'yellow'; label = 'Medium Load Training';
-      } else {
-        color = 'green'; label = 'Recovery & Regeneration';
-      }
+      // Leave training days unassigned - AI will determine the structure
+      color = 'grey'; 
+      label = 'Training Day (AI will determine load)';
     }
     return { day: idx + 1, date: iso, color, label, isFixture, fixture: fixture ? {
       opponent: (fixture.home_team||fixture.home) === team.name ? (fixture.away_team || fixture.away || fixture.opponent) : (fixture.home_team || fixture.home || fixture.opponent),
@@ -348,10 +342,10 @@ async function assignPeriodizedLoads(timeline, userObjective = '', userSelectedP
 
   const timelineContext = timeline.map((day, idx) => {
     const fixtureInfo = day.isFixture ? ` (MATCH vs ${day.fixture?.opponent})` : '';
-    return `${idx + 1}. ${day.date}: ${day.mesocycle_phase} phase${fixtureInfo}`;
+    return `${idx + 1}. ${day.date}: ${day.isFixture ? 'MATCH DAY' : 'TRAINING DAY'}${fixtureInfo}`;
   }).join('\n');
 
-  const prompt = `You are an elite soccer periodization coach. Create a COMPLETELY UNIQUE and intelligent training load distribution for this team.
+  const prompt = `You are an elite soccer periodization coach. Create a COMPLETELY UNIQUE and innovative training periodization for this team.
 
 TEAM OBJECTIVE: ${userObjective || 'General team development'}
 FOCUS PRINCIPLES: ${userSelectedPrinciples.join(', ') || 'General development'}
@@ -359,27 +353,33 @@ FOCUS PRINCIPLES: ${userSelectedPrinciples.join(', ') || 'General development'}
 FIXTURES IN PERIOD:
 ${fixturesContext || 'No matches scheduled'}
 
-CURRENT TIMELINE STRUCTURE:
+TIMELINE STRUCTURE:
 ${timelineContext}
 
 Create a periodization that is:
-1. COMPLETELY UNIQUE - avoid any standard patterns
+1. COMPLETELY UNIQUE - avoid any standard patterns like MD-5/4/3/2/1
 2. HIGHLY SPECIFIC to this team's objectives and focus principles
 3. INNOVATIVE in load distribution approach
 4. CONTEXTUAL to the specific fixtures and timeline
 5. SHOWS ADVANCED PERIODIZATION EXPERTISE
+6. BREAKS AWAY from traditional weekly patterns
 
-For each training day, assign the most appropriate load class:
+For each day, assign the most appropriate load class and create unique periodization:
 - High: High intensity training, technical/tactical focus
 - Medium: Moderate intensity, skill development
 - Low: Light training, recovery focus
 - Recovery: Active recovery, regeneration
 - Off: Complete rest
 
-IMPORTANT: Make this periodization COMPLETELY DIFFERENT from standard patterns. Be creative and innovative. Show advanced coaching expertise.
+IMPORTANT: 
+- Make this periodization COMPLETELY DIFFERENT from standard patterns
+- Be creative and innovative - show advanced coaching expertise
+- Consider the team's specific objectives and focus principles
+- Create unique load distribution that reflects periodization science
+- Avoid generic weekly patterns
 
 Return JSON format:
-{"load_distribution": [{"day_index": 0, "load_class": "High", "rationale": "Detailed explanation for this unique load choice"}]}
+{"load_distribution": [{"day_index": 0, "load_class": "High", "rationale": "Detailed explanation for this unique load choice", "md_label": "Custom label", "mesocycle_phase": "Accumulation"}]}
 
 STRICT JSON ONLY.`;
 
@@ -393,23 +393,33 @@ STRICT JSON ONLY.`;
   const parsed = JSON.parse(text);
   const loadDistribution = parsed.load_distribution || [];
   
-  // Apply AI-generated load distribution
-  loadDistribution.forEach(({ day_index, load_class, rationale }) => {
-    if (timeline[day_index] && !timeline[day_index].isFixture) {
-      timeline[day_index].load_class = load_class;
-      timeline[day_index].color = LOAD_COLOR_MAP[load_class];
-      timeline[day_index].label = LOAD_LABEL_MAP[load_class];
-      timeline[day_index].ai_rationale = rationale;
+  // Apply AI-generated load distribution to ENTIRE timeline
+  loadDistribution.forEach(({ day_index, load_class, rationale, md_label, mesocycle_phase }) => {
+    if (timeline[day_index]) {
+      if (timeline[day_index].isFixture) {
+        // Match days
+        timeline[day_index].load_class = 'Match';
+        timeline[day_index].color = LOAD_COLOR_MAP.Match;
+        timeline[day_index].label = LOAD_LABEL_MAP.Match + (timeline[day_index].fixture ? ` vs ${timeline[day_index].fixture.opponent}` : '');
+        timeline[day_index].md_label = 'MD';
+      } else {
+        // Training days - AI determines everything
+        timeline[day_index].load_class = load_class;
+        timeline[day_index].color = LOAD_COLOR_MAP[load_class];
+        timeline[day_index].label = LOAD_LABEL_MAP[load_class];
+        timeline[day_index].ai_rationale = rationale;
+        timeline[day_index].md_label = md_label || null;
+        timeline[day_index].mesocycle_phase = mesocycle_phase || 'General';
+      }
     }
   });
   
-  // Ensure match days are properly set
-  timeline.forEach(day => {
-    if (day.isFixture) {
-      day.load_class = 'Match';
-      day.color = LOAD_COLOR_MAP.Match;
-      day.label = LOAD_LABEL_MAP.Match + (day.fixture ? ` vs ${day.fixture.opponent}` : '');
-      day.md_label = 'MD';
+  // Add week indices and mesocycle phases
+  timeline.forEach((day, idx) => {
+    const weekIndex = Math.floor(idx / 7);
+    day.week_index = weekIndex;
+    if (!day.mesocycle_phase) {
+      day.mesocycle_phase = mesocyclePhase(weekIndex);
     }
   });
 }
