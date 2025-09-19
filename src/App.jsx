@@ -6,6 +6,7 @@ import Athletes from './pages/Athletes'
 import TeamPeriodization from './pages/TeamPeriodization';
 import PlanManagement from './pages/PlanManagement';
 import WorkloadPage from './pages/WorkloadPage';
+import IdealMVP from './pages/IdealMVP';
 import { useState, useEffect } from 'react';
 import { AthleteDataGrid } from './components';
 
@@ -37,6 +38,7 @@ function App() {
         <Route path="/help" element={<SimplePage pageName="Help" />} />
         <Route path="/team-planning" element={<TeamPeriodization onHeaderControlsChange={setHeaderControls} />} />
         <Route path="/plan-management" element={<PlanManagement />} />
+        <Route path="/ideal-mvp" element={<IdealMVP />} />
   </Routes>
   </ErrorBoundary>
       {/* Temporarily comment out AthleteDataGrid to avoid MUI license warnings */}
