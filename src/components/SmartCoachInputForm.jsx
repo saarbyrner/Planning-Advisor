@@ -14,7 +14,8 @@ import {
   Paper,
   Divider,
   Alert,
-  CircularProgress
+  CircularProgress,
+  Slider
 } from '@mui/material';
 import { 
   SportsSoccerOutlined,
@@ -29,9 +30,14 @@ const SmartCoachInputForm = ({ onGeneratePlan, loading = false }) => {
   const [formData, setFormData] = useState({
     startDate: new Date().toISOString().split('T')[0],
     endDate: new Date(Date.now() + 35 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // 5 weeks from now
-    primaryFocus: 'pressing',
-    secondaryFocus: 'transition',
-    tertiaryFocus: 'final-delivery',
+    focusPercentages: {
+      'pressing': 50,
+      'transition': 30,
+      'final-delivery': 20,
+      'possession': 0,
+      'defensive-shape': 0,
+      'attacking-patterns': 0
+    },
     sessionDuration: 60
   });
 
@@ -53,6 +59,27 @@ const SmartCoachInputForm = ({ onGeneratePlan, loading = false }) => {
       [field]: value
     }));
     // Reset AI schedule when inputs change
+    setAiSchedule(null);
+  };
+
+  const handleFocusPercentageChange = (focusArea, newValue) => {
+    setFormData(prev => {
+      const newPercentages = { ...prev.focusPercentages, [focusArea]: newValue };
+      
+      // Normalize percentages to ensure they sum to 100
+      const total = Object.values(newPercentages).reduce((sum, val) => sum + val, 0);
+      if (total > 100) {
+        // Scale down all values proportionally
+        Object.keys(newPercentages).forEach(key => {
+          newPercentages[key] = Math.round((newPercentages[key] / total) * 100);
+        });
+      }
+      
+      return {
+        ...prev,
+        focusPercentages: newPercentages
+      };
+    });
     setAiSchedule(null);
   };
 
@@ -87,7 +114,9 @@ const SmartCoachInputForm = ({ onGeneratePlan, loading = false }) => {
     schedule.rationale = `AI-generated ${weeks}-week plan (${daysDiff} days) with ${totalSessions} total sessions. Sessions are intelligently distributed for optimal learning and recovery.`;
 
     // Calculate intensity distribution based on focus areas
-    const highIntensityRatio = requirements.primaryFocus === 'pressing' ? 0.4 : 0.3;
+    const focusPercentages = requirements.focusPercentages || {};
+    const pressingPercentage = focusPercentages.pressing || 0;
+    const highIntensityRatio = pressingPercentage > 30 ? 0.4 : 0.3;
     const mediumIntensityRatio = 0.4;
     const lowIntensityRatio = 1 - highIntensityRatio - mediumIntensityRatio;
 
@@ -172,67 +201,85 @@ const SmartCoachInputForm = ({ onGeneratePlan, loading = false }) => {
               color: 'var(--color-text-primary)'
             }}>
               <TrendingUpOutlined />
-              Learning Focus (Priority Order)
+              Learning Focus Distribution
             </Typography>
-            <Grid container spacing={2}>
-              <Grid item xs={12} sm={4}>
-                <FormControl fullWidth>
-                  <InputLabel>Priority 1 (Primary Focus)</InputLabel>
-                  <Select
-                    value={formData.primaryFocus}
-                    onChange={(e) => handleInputChange('primaryFocus', e.target.value)}
-                    label="Priority 1 (Primary Focus)"
-                  >
-                    {focusOptions.map((option) => (
-                      <MenuItem key={option.value} value={option.value}>
+            <Typography variant="body2" sx={{ 
+              mb: 3, 
+              color: 'var(--color-text-secondary)',
+              fontStyle: 'italic'
+            }}>
+              Adjust the sliders to set your training focus priorities. Total must equal 100%.
+            </Typography>
+            
+            <Grid container spacing={3}>
+              {focusOptions.map((option) => (
+                <Grid item xs={12} sm={6} key={option.value}>
+                  <Box sx={{ mb: 2 }}>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
+                      <Typography variant="subtitle1" sx={{ 
+                        fontWeight: 'var(--font-weight-medium)',
+                        color: 'var(--color-text-primary)',
+                        textTransform: 'capitalize'
+                      }}>
                         {option.label}
-                      </MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
-                <Typography variant="caption" sx={{ mt: 1, display: 'block', color: 'var(--color-text-secondary)' }}>
-                  {getFocusDescription(formData.primaryFocus)}
-                </Typography>
-              </Grid>
-              <Grid item xs={12} sm={4}>
-                <FormControl fullWidth>
-                  <InputLabel>Priority 2 (Secondary Focus)</InputLabel>
-                  <Select
-                    value={formData.secondaryFocus}
-                    onChange={(e) => handleInputChange('secondaryFocus', e.target.value)}
-                    label="Priority 2 (Secondary Focus)"
-                  >
-                    {focusOptions.filter(opt => opt.value !== formData.primaryFocus).map((option) => (
-                      <MenuItem key={option.value} value={option.value}>
-                        {option.label}
-                      </MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
-                <Typography variant="caption" sx={{ mt: 1, display: 'block', color: 'var(--color-text-secondary)' }}>
-                  {getFocusDescription(formData.secondaryFocus)}
-                </Typography>
-              </Grid>
-              <Grid item xs={12} sm={4}>
-                <FormControl fullWidth>
-                  <InputLabel>Priority 3 (Tertiary Focus)</InputLabel>
-                  <Select
-                    value={formData.tertiaryFocus}
-                    onChange={(e) => handleInputChange('tertiaryFocus', e.target.value)}
-                    label="Priority 3 (Tertiary Focus)"
-                  >
-                    {focusOptions.filter(opt => opt.value !== formData.primaryFocus && opt.value !== formData.secondaryFocus).map((option) => (
-                      <MenuItem key={option.value} value={option.value}>
-                        {option.label}
-                      </MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
-                <Typography variant="caption" sx={{ mt: 1, display: 'block', color: 'var(--color-text-secondary)' }}>
-                  {getFocusDescription(formData.tertiaryFocus)}
-                </Typography>
-              </Grid>
+                      </Typography>
+                      <Typography variant="h6" sx={{ 
+                        fontWeight: 'var(--font-weight-semibold)',
+                        color: 'var(--color-primary)',
+                        minWidth: '40px',
+                        textAlign: 'right'
+                      }}>
+                        {formData.focusPercentages[option.value]}%
+                      </Typography>
+                    </Box>
+                    <Slider
+                      value={formData.focusPercentages[option.value]}
+                      onChange={(e, newValue) => handleFocusPercentageChange(option.value, newValue)}
+                      min={0}
+                      max={100}
+                      step={5}
+                      sx={{
+                        color: 'var(--color-primary)',
+                        '& .MuiSlider-thumb': {
+                          backgroundColor: 'var(--color-primary)',
+                        },
+                        '& .MuiSlider-track': {
+                          backgroundColor: 'var(--color-primary)',
+                        },
+                        '& .MuiSlider-rail': {
+                          backgroundColor: 'var(--color-border-primary)',
+                        }
+                      }}
+                    />
+                    <Typography variant="caption" sx={{ 
+                      color: 'var(--color-text-secondary)',
+                      display: 'block',
+                      mt: 0.5
+                    }}>
+                      {option.description}
+                    </Typography>
+                  </Box>
+                </Grid>
+              ))}
             </Grid>
+            
+            {/* Total Percentage Display */}
+            <Box sx={{ 
+              mt: 3, 
+              p: 2, 
+              backgroundColor: 'var(--color-background-primary)', 
+              borderRadius: 'var(--radius-md)',
+              border: '1px solid var(--color-border-primary)'
+            }}>
+              <Typography variant="body2" sx={{ 
+                color: 'var(--color-text-primary)',
+                fontWeight: 'var(--font-weight-medium)',
+                textAlign: 'center'
+              }}>
+                Total: {Object.values(formData.focusPercentages).reduce((sum, val) => sum + val, 0)}%
+                {Object.values(formData.focusPercentages).reduce((sum, val) => sum + val, 0) === 100 ? ' ✓' : ' (Must equal 100%)'}
+              </Typography>
+            </Box>
           </Paper>
         </Grid>
 

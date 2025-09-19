@@ -53,8 +53,13 @@ const IdealMVP = () => {
       const planOptions = {
         startDate: data.startDate || new Date().toISOString().split('T')[0],
         endDate: data.endDate,
-        objective: `Focus on ${data.primaryFocus} (primary), ${data.secondaryFocus} (secondary), ${data.tertiaryFocus} (tertiary)`,
-        userSelectedPrinciples: [data.primaryFocus, data.secondaryFocus, data.tertiaryFocus],
+        objective: `Focus distribution: ${Object.entries(data.focusPercentages || {})
+          .filter(([_, percentage]) => percentage > 0)
+          .map(([principle, percentage]) => `${principle} (${percentage}%)`)
+          .join(', ')}`,
+        userSelectedPrinciples: Object.entries(data.focusPercentages || {})
+          .filter(([_, percentage]) => percentage > 0)
+          .map(([principle, _]) => principle),
         variability: 'medium',
         generationMode: 'curated'
       };
@@ -102,13 +107,8 @@ const IdealMVP = () => {
   };
 
   const calculatePrinciplePercentages = (data) => {
-    // Simple percentage calculation based on priorities
-    const percentages = {
-      [data.primaryFocus]: 50,
-      [data.secondaryFocus]: 30,
-      [data.tertiaryFocus]: 20
-    };
-    return percentages;
+    // Use the focus percentages directly from the form data
+    return data.focusPercentages || {};
   };
 
   const calculateExpectedImprovements = (percentages) => {
