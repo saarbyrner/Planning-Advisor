@@ -82,31 +82,24 @@ function computeWeeklyMetrics(timeline) {
 
 // AI-driven summary generator that creates intelligent periodization based on input parameters
 async function generateSummary(team, fixturesInRange, durationDescriptor, timeline, userObjective='') {
-  const apiKey = getApiKey();
-  if (!apiKey || apiKey === 'your-gemini-api-key-here') {
-    // Fallback to basic summary if no API key
-    return generateBasicSummary(team, fixturesInRange, durationDescriptor, timeline, userObjective);
-  }
+  const model = getGoogleAI()('models/gemini-1.5-flash-latest');
+  
+  // Build context for AI analysis
+  const totalMatches = fixturesInRange.length;
+  const weeks = [...new Set(timeline.map(d=>d.week_index))].length;
+  const highDays = timeline.filter(d=>d.load_class==='High').length;
+  const mediumDays = timeline.filter(d=>d.load_class==='Medium').length;
+  const lowRecovery = timeline.filter(d=>d.load_class==='Low' || d.load_class==='Recovery').length;
+  const phases = [...new Set(timeline.map(d=> d.mesocycle_phase))];
+  const firstDate = timeline[0]?.date;
+  const lastDate = timeline[timeline.length-1]?.date;
+  
+  // Create fixtures context
+  const fixturesContext = fixturesInRange.map(f => 
+    `${f.date}: ${f.home_team} vs ${f.away_team} (${f.competition})`
+  ).join(', ');
 
-  try {
-    const model = getGoogleAI()('models/gemini-1.5-flash-latest');
-    
-    // Build context for AI analysis
-    const totalMatches = fixturesInRange.length;
-    const weeks = [...new Set(timeline.map(d=>d.week_index))].length;
-    const highDays = timeline.filter(d=>d.load_class==='High').length;
-    const mediumDays = timeline.filter(d=>d.load_class==='Medium').length;
-    const lowRecovery = timeline.filter(d=>d.load_class==='Low' || d.load_class==='Recovery').length;
-    const phases = [...new Set(timeline.map(d=> d.mesocycle_phase))];
-    const firstDate = timeline[0]?.date;
-    const lastDate = timeline[timeline.length-1]?.date;
-    
-    // Create fixtures context
-    const fixturesContext = fixturesInRange.map(f => 
-      `${f.date}: ${f.home_team} vs ${f.away_team} (${f.competition})`
-    ).join(', ');
-
-    const prompt = `You are an elite soccer periodization coach. Analyze this training plan and create an intelligent summary.
+  const prompt = `You are an elite soccer periodization coach. Create a COMPLETELY UNIQUE and innovative periodization summary for this training plan.
 
 TEAM: ${team.name}
 DURATION: ${durationDescriptor} (${weeks} weeks from ${firstDate} to ${lastDate})
@@ -125,37 +118,28 @@ ${timeline.map(day =>
   `${day.date}: ${day.load_class} load, ${day.mesocycle_phase} phase${day.isFixture ? ` (MATCH: ${day.fixture?.opponent})` : ''}`
 ).join('\n')}
 
-Create a professional periodization summary that:
-1. Explains the training philosophy and approach
-2. Justifies the load distribution based on fixtures and phases
-3. Highlights key training principles that align with the user's objectives
-4. Shows understanding of periodization science
+Create a periodization summary that is:
+1. COMPLETELY UNIQUE and innovative
+2. HIGHLY SPECIFIC to this team's objectives and approach
+3. SHOWS ADVANCED PERIODIZATION EXPERTISE
+4. EXPLAINS the unique training philosophy and approach
+5. JUSTIFIES the load distribution with advanced reasoning
+6. HIGHLIGHTS innovative training principles
+
+IMPORTANT: Make this summary COMPLETELY DIFFERENT from standard periodization explanations. Be creative and show advanced coaching expertise.
 
 Return JSON format:
-{"summary": "Detailed periodization explanation...", "principles": ["Principle 1", "Principle 2", "Principle 3"]}
+{"summary": "Innovative and unique periodization explanation...", "principles": ["Unique Principle 1", "Unique Principle 2", "Unique Principle 3"]}
 
 Focus on the user's specific objectives: ${userObjective}`;
 
-    const { text } = await generateText({ model, prompt, maxTokens: 2000 });
-    
-    try {
-      const parsed = JSON.parse(text);
-      return {
-        summary: parsed.summary || 'AI-generated periodization plan',
-        principles: parsed.principles || []
-      };
-    } catch (parseError) {
-      // If JSON parsing fails, use the text as summary
-      return {
-        summary: text,
-        principles: []
-      };
-    }
-  } catch (error) {
-    console.error('AI summary generation failed:', error);
-    // Fallback to basic summary
-    return generateBasicSummary(team, fixturesInRange, durationDescriptor, timeline, userObjective);
-  }
+  const { text } = await generateText({ model, prompt, maxTokens: 3000 });
+  
+  const parsed = JSON.parse(text);
+  return {
+    summary: parsed.summary || 'AI-generated periodization plan',
+    principles: parsed.principles || []
+  };
 }
 
 // Fallback basic summary generator
@@ -349,27 +333,20 @@ function buildTimeline(team, fixtures, { weeks, startDate, endDate }) {
 // Apply periodization immediately after building raw timeline (public helper if needed elsewhere)
 // AI-driven periodization that creates intelligent load distribution based on user parameters
 async function assignPeriodizedLoads(timeline, userObjective = '', userSelectedPrinciples = []) {
-  const apiKey = getApiKey();
-  if (!apiKey || apiKey === 'your-gemini-api-key-here') {
-    // Fallback to deterministic periodization if no API key
-    return assignPeriodizedLoadsDeterministic(timeline);
-  }
+  const model = getGoogleAI()('models/gemini-1.5-flash-latest');
+  
+  // Build context for AI periodization
+  const fixtures = timeline.filter(d => d.isFixture);
+  const fixturesContext = fixtures.map(f => 
+    `${f.date}: vs ${f.fixture?.opponent} (${f.fixture?.competition || 'League'})`
+  ).join(', ');
 
-  try {
-    const model = getGoogleAI()('models/gemini-1.5-flash-latest');
-    
-    // Build context for AI periodization
-    const fixtures = timeline.filter(d => d.isFixture);
-    const fixturesContext = fixtures.map(f => 
-      `${f.date}: vs ${f.fixture?.opponent} (${f.fixture?.competition || 'League'})`
-    ).join(', ');
+  const timelineContext = timeline.map((day, idx) => {
+    const fixtureInfo = day.isFixture ? ` (MATCH vs ${day.fixture?.opponent})` : '';
+    return `${idx + 1}. ${day.date}: ${day.mesocycle_phase} phase${fixtureInfo}`;
+  }).join('\n');
 
-    const timelineContext = timeline.map((day, idx) => {
-      const fixtureInfo = day.isFixture ? ` (MATCH vs ${day.fixture?.opponent})` : '';
-      return `${idx + 1}. ${day.date}: ${day.mesocycle_phase} phase${fixtureInfo}`;
-    }).join('\n');
-
-    const prompt = `You are an elite soccer periodization coach. Create an intelligent training load distribution for this team.
+  const prompt = `You are an elite soccer periodization coach. Create a COMPLETELY UNIQUE and intelligent training load distribution for this team.
 
 TEAM OBJECTIVE: ${userObjective || 'General team development'}
 FOCUS PRINCIPLES: ${userSelectedPrinciples.join(', ') || 'General development'}
@@ -380,12 +357,12 @@ ${fixturesContext || 'No matches scheduled'}
 CURRENT TIMELINE STRUCTURE:
 ${timelineContext}
 
-Create an intelligent periodization that:
-1. RESPONDS to the team's specific objectives and focus principles
-2. OPTIMIZES load distribution around fixtures for peak performance
-3. SHOWS PERIODIZATION EXPERTISE (not generic patterns)
-4. CONSIDERS the mesocycle phases and development goals
-5. ADAPTS to fixture congestion and match importance
+Create a periodization that is:
+1. COMPLETELY UNIQUE - avoid any standard patterns
+2. HIGHLY SPECIFIC to this team's objectives and focus principles
+3. INNOVATIVE in load distribution approach
+4. CONTEXTUAL to the specific fixtures and timeline
+5. SHOWS ADVANCED PERIODIZATION EXPERTISE
 
 For each training day, assign the most appropriate load class:
 - High: High intensity training, technical/tactical focus
@@ -394,54 +371,37 @@ For each training day, assign the most appropriate load class:
 - Recovery: Active recovery, regeneration
 - Off: Complete rest
 
-Return JSON format:
-{"load_distribution": [{"day_index": 0, "load_class": "High", "rationale": "Explanation for this load choice"}]}
+IMPORTANT: Make this periodization COMPLETELY DIFFERENT from standard patterns. Be creative and innovative. Show advanced coaching expertise.
 
-Guidelines:
-- Match days are always 'Match' load
-- Consider fixture proximity and importance
-- Align with the team's focus principles and objectives
-- Show periodization intelligence, not generic patterns
-- Provide rationale for each load decision
+Return JSON format:
+{"load_distribution": [{"day_index": 0, "load_class": "High", "rationale": "Detailed explanation for this unique load choice"}]}
 
 STRICT JSON ONLY.`;
 
-    const { text } = await generateText({ model, prompt, maxTokens: 2000 });
-    
-    try {
-      const parsed = JSON.parse(text);
-      const loadDistribution = parsed.load_distribution || [];
-      
-      // Apply AI-generated load distribution
-      loadDistribution.forEach(({ day_index, load_class, rationale }) => {
-        if (timeline[day_index] && !timeline[day_index].isFixture) {
-          timeline[day_index].load_class = load_class;
-          timeline[day_index].color = LOAD_COLOR_MAP[load_class];
-          timeline[day_index].label = LOAD_LABEL_MAP[load_class];
-          timeline[day_index].ai_rationale = rationale;
-        }
-      });
-      
-      // Ensure match days are properly set
-      timeline.forEach(day => {
-        if (day.isFixture) {
-          day.load_class = 'Match';
-          day.color = LOAD_COLOR_MAP.Match;
-          day.label = LOAD_LABEL_MAP.Match + (day.fixture ? ` vs ${day.fixture.opponent}` : '');
-          day.md_label = 'MD';
-        }
-      });
-      
-    } catch (parseError) {
-      console.error('AI periodization parsing failed:', parseError);
-      // Fallback to deterministic
-      return assignPeriodizedLoadsDeterministic(timeline);
+  const { text } = await generateText({ model, prompt, maxTokens: 3000 });
+  
+  const parsed = JSON.parse(text);
+  const loadDistribution = parsed.load_distribution || [];
+  
+  // Apply AI-generated load distribution
+  loadDistribution.forEach(({ day_index, load_class, rationale }) => {
+    if (timeline[day_index] && !timeline[day_index].isFixture) {
+      timeline[day_index].load_class = load_class;
+      timeline[day_index].color = LOAD_COLOR_MAP[load_class];
+      timeline[day_index].label = LOAD_LABEL_MAP[load_class];
+      timeline[day_index].ai_rationale = rationale;
     }
-  } catch (error) {
-    console.error('AI periodization generation failed:', error);
-    // Fallback to deterministic
-    return assignPeriodizedLoadsDeterministic(timeline);
-  }
+  });
+  
+  // Ensure match days are properly set
+  timeline.forEach(day => {
+    if (day.isFixture) {
+      day.load_class = 'Match';
+      day.color = LOAD_COLOR_MAP.Match;
+      day.label = LOAD_LABEL_MAP.Match + (day.fixture ? ` vs ${day.fixture.opponent}` : '');
+      day.md_label = 'MD';
+    }
+  });
 }
 
 // Fallback deterministic periodization (original logic)
@@ -903,13 +863,11 @@ export async function generateSessionDrills(plan, sessionIndex, { useModelRefine
    * For 'hybrid' we only invoke model for phases that received 0 curated drills.
    */
   async function generateDrillsViaModel(phasesForGen, basePhasesMeta) {
-    const apiKey = getApiKey();
-    if (!apiKey) return {};
     const model = getGoogleAI()('models/gemini-1.5-flash-latest');
     const sessionLoad = session.overall_load;
     const principlesList = (session.principles_applied || []).join('; ');
     const phaseDescriptor = phasesForGen.map(p => ({ name: p.name, target_intensity: p.target_intensity||p.intensity||'Medium'}));
-    const prompt = `You are an elite soccer periodization coach. Create detailed, intelligent drills for this specific session.
+    const prompt = `You are an elite soccer periodization coach. Create COMPLETELY UNIQUE and innovative drills for this specific session.
 
 SESSION CONTEXT:
 - Date: ${session.date}
@@ -930,21 +888,24 @@ PERIODIZATION INTELLIGENCE:
 - Consider the week's progression and overall periodization goals
 - Align drill complexity and intensity with the mesocycle phase
 
-Create drills that:
-1. Are SPECIFIC to this session's load and phase
-2. DIRECTLY support the training principles listed above
-3. Show PERIODIZATION INTELLIGENCE (not generic drills)
-4. Are PROGRESSIVE and CONTEXTUAL to the team's development phase
-5. Consider match preparation/recovery if applicable
+Create drills that are:
+1. COMPLETELY UNIQUE and innovative
+2. HIGHLY SPECIFIC to this session's load and phase
+3. DIRECTLY support the training principles listed above
+4. Show ADVANCED PERIODIZATION INTELLIGENCE
+5. Are PROGRESSIVE and CONTEXTUAL to the team's development phase
+6. Consider match preparation/recovery if applicable
+
+IMPORTANT: Make these drills COMPLETELY DIFFERENT from standard drills. Be creative and innovative. Show advanced coaching expertise.
 
 Return STRICT JSON only in this schema:
-{"phases":[{"phase":"Phase Name","drills":[{"name":"Drill Name","duration":10,"load":"Low|Medium|High","objective_primary":"Primary objective","objectives_secondary":["Secondary A","Secondary B"],"equipment":["Balls","Cones"],"coaching_points":["Coaching point 1"],"constraints":["Rule"],"progressions":["Progression"],"regressions":["Regression"],"players":{"arrangement":"Shape or numbers"},"space":{"dimensions":"Area dimensions"}}]}]}
+{"phases":[{"phase":"Phase Name","drills":[{"name":"Unique Drill Name","duration":10,"load":"Low|Medium|High","objective_primary":"Unique primary objective","objectives_secondary":["Unique Secondary A","Unique Secondary B"],"equipment":["Balls","Cones"],"coaching_points":["Unique coaching point 1"],"constraints":["Unique Rule"],"progressions":["Unique Progression"],"regressions":["Unique Regression"],"players":{"arrangement":"Unique Shape or numbers"},"space":{"dimensions":"Unique Area dimensions"}}]}]}
 
 Guidelines:
 - 1–3 drills per phase depending on intensity (High up to 3, Low often 1-2)
 - Duration sum per phase should not exceed 35 minutes and be realistic vs intensity
-- Make drill names and objectives SPECIFIC to the training principles and periodization phase
-- Avoid generic drills - show coaching expertise and periodization knowledge
+- Make drill names and objectives COMPLETELY UNIQUE and innovative
+- Show advanced coaching expertise and periodization knowledge
 - If a phase is Cool Down include recovery / down regulation focus
 - Consider the match context if this is a match day
 
