@@ -140,7 +140,17 @@ Focus on the user's specific objectives: ${userObjective}`;
     temperature: 0.9 // Higher creativity for more unique content
   });
   
-  const parsed = JSON.parse(text);
+  console.log('AI summary response:', text);
+  
+  let parsed;
+  try {
+    parsed = JSON.parse(text);
+  } catch (parseError) {
+    console.error('Failed to parse AI summary response:', parseError);
+    console.error('Raw response:', text);
+    throw new Error(`AI summary response was not valid JSON: ${parseError.message}`);
+  }
+  
   return {
     summary: parsed.summary || 'AI-generated periodization plan',
     principles: parsed.principles || []
@@ -390,7 +400,17 @@ STRICT JSON ONLY.`;
     temperature: 0.9 // Higher creativity for more unique content
   });
   
-  const parsed = JSON.parse(text);
+  console.log('AI periodization response:', text);
+  
+  let parsed;
+  try {
+    parsed = JSON.parse(text);
+  } catch (parseError) {
+    console.error('Failed to parse AI periodization response:', parseError);
+    console.error('Raw response:', text);
+    throw new Error(`AI periodization response was not valid JSON: ${parseError.message}`);
+  }
+  
   const loadDistribution = parsed.load_distribution || [];
   
   // Apply AI-generated load distribution to ENTIRE timeline
@@ -1208,7 +1228,7 @@ export async function generateTeamPlan(teamId, weeksOrOptions = 5) {
   if (!team) return 'Team not found';
   const apiKey = getApiKey();
   if (!apiKey || apiKey === 'your-gemini-api-key-here') {
-    return 'Please add your AI API key in settings or set VITE_GEMINI_API_KEY in .env to enable AI generation.';
+    throw new Error('Please add your AI API key in settings or set VITE_GEMINI_API_KEY in .env to enable AI generation.');
   }
 
   const isoStart = options.startDate;

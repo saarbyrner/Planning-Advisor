@@ -103,7 +103,9 @@ const IdealMVP = ({ onBack }) => {
         details: [...prev.details, 'Starting AI periodization generation']
       }));
 
+      console.log('About to call generateTeamPlan with options:', planOptions);
       const plan = await generateTeamPlan(1, planOptions); // Use teamId 1 as default - generates full plan with AI-created drills
+      console.log('generateTeamPlan completed, plan:', plan);
       
       setGenerationProgress(prev => ({
         ...prev,
@@ -186,9 +188,14 @@ const IdealMVP = ({ onBack }) => {
       }, 1000);
     } catch (error) {
       console.error('Error generating plan:', error);
+      console.error('Error details:', {
+        message: error.message,
+        stack: error.stack,
+        name: error.name
+      });
       setSnackbar({ 
         open: true, 
-        message: 'Failed to generate plan. Please try again.', 
+        message: `Failed to generate plan: ${error.message || 'Unknown error'}. Please try again.`, 
         severity: 'error' 
       });
     } finally {
