@@ -81,15 +81,17 @@ const IdealMVP = ({ onBack }) => {
         startDate: data.startDate || new Date().toISOString().split('T')[0],
         endDate: data.endDate,
         fixtures: fixtures, // Pass fixtures to AI
-        objective: `Focus distribution: ${Object.entries(data.focusPercentages || {})
+        objective: data.planSettings?.objective || `Focus distribution: ${Object.entries(data.focusPercentages || {})
           .filter(([_, percentage]) => percentage > 0)
           .map(([principle, percentage]) => `${principle} (${percentage}%)`)
           .join(', ')}`,
-        userSelectedPrinciples: Object.entries(data.focusPercentages || {})
-          .filter(([_, percentage]) => percentage > 0)
-          .map(([principle, _]) => principle),
-        variability: 'medium', // Balanced variability for intelligent periodization
-        generationMode: 'generative' // Use AI to generate intelligent, parameter-driven drills
+        userSelectedPrinciples: data.selectedPrinciples?.length > 0 
+          ? data.selectedPrinciples
+          : Object.entries(data.focusPercentages || {})
+              .filter(([_, percentage]) => percentage > 0)
+              .map(([principle, _]) => principle),
+        variability: data.planSettings?.variability || 'medium',
+        generationMode: data.planSettings?.generationMode || 'generative'
       };
 
       console.log('Generating plan with options:', planOptions);
@@ -374,7 +376,7 @@ const IdealMVP = ({ onBack }) => {
             </IconButton>
           </Tooltip>
         )}
-        <Typography variant="h4" sx={{ 
+        <Typography variant="h6" sx={{ 
           fontWeight: 'var(--font-weight-semibold)',
           color: 'var(--color-text-primary)'
         }}>

@@ -25,6 +25,8 @@ import {
   AutoAwesomeOutlined,
   CalendarTodayOutlined
 } from '@mui/icons-material';
+import PlanSettingsForm from './PlanSettingsForm';
+import principlesData from '../data/principles_of_play.json';
 
 const SmartCoachInputForm = ({ onGeneratePlan, loading = false }) => {
   const [formData, setFormData] = useState({
@@ -38,8 +40,18 @@ const SmartCoachInputForm = ({ onGeneratePlan, loading = false }) => {
       'defensive-shape': 0,
       'attacking-patterns': 0
     },
-    sessionDuration: 60
+    sessionDuration: 90
   });
+
+  // Plan settings state
+  const [planSettings, setPlanSettings] = useState({
+    variability: 'medium', // low | medium | high
+    objective: '',
+    generationMode: 'generative' // curated | hybrid | generative
+  });
+
+  // Focus principles state (separate from settings)
+  const [selectedPrinciples, setSelectedPrinciples] = useState([]);
 
   const [aiSchedule, setAiSchedule] = useState(null);
 
@@ -81,6 +93,17 @@ const SmartCoachInputForm = ({ onGeneratePlan, loading = false }) => {
       };
     });
     setAiSchedule(null);
+  };
+
+  const handlePrincipleToggle = (principleName) => {
+    setSelectedPrinciples(prev => {
+      if (prev.includes(principleName)) {
+        return prev.filter(name => name !== principleName);
+      } else if (prev.length < 7) {
+        return [...prev, principleName];
+      }
+      return prev;
+    });
   };
 
   const generateAiSchedule = async () => {
@@ -138,7 +161,9 @@ const SmartCoachInputForm = ({ onGeneratePlan, loading = false }) => {
           ...formData,
           aiSchedule: aiSchedule,
           startDate: formData.startDate,
-          endDate: formData.endDate
+          endDate: formData.endDate,
+          planSettings: planSettings,
+          selectedPrinciples: selectedPrinciples
         };
         onGeneratePlan(planData);
       });
@@ -147,7 +172,9 @@ const SmartCoachInputForm = ({ onGeneratePlan, loading = false }) => {
         ...formData,
         aiSchedule: aiSchedule,
         startDate: formData.startDate,
-        endDate: formData.endDate
+        endDate: formData.endDate,
+        planSettings: planSettings,
+        selectedPrinciples: selectedPrinciples
       };
       onGeneratePlan(planData);
     }
@@ -298,7 +325,7 @@ const SmartCoachInputForm = ({ onGeneratePlan, loading = false }) => {
             </Typography>
             
             <Grid container spacing={2} sx={{ mb: 2 }}>
-              <Grid item xs={12} sm={6}>
+              <Grid item xs={12} sm={4}>
                 <TextField
                   fullWidth
                   label="Start Date"
@@ -309,7 +336,7 @@ const SmartCoachInputForm = ({ onGeneratePlan, loading = false }) => {
                   InputLabelProps={{ shrink: true }}
                 />
               </Grid>
-              <Grid item xs={12} sm={6}>
+              <Grid item xs={12} sm={4}>
                 <TextField
                   fullWidth
                   label="End Date"
@@ -318,6 +345,18 @@ const SmartCoachInputForm = ({ onGeneratePlan, loading = false }) => {
                   onChange={(e) => handleInputChange('endDate', e.target.value)}
                   variant="outlined"
                   InputLabelProps={{ shrink: true }}
+                />
+              </Grid>
+              <Grid item xs={12} sm={4}>
+                <TextField
+                  fullWidth
+                  label="Session Duration (minutes)"
+                  type="number"
+                  value={formData.sessionDuration}
+                  onChange={(e) => handleInputChange('sessionDuration', parseInt(e.target.value) || 90)}
+                  variant="outlined"
+                  inputProps={{ min: 30, max: 180, step: 15 }}
+                  helperText="Typical: 75-105 minutes"
                 />
               </Grid>
             </Grid>
@@ -356,10 +395,84 @@ const SmartCoachInputForm = ({ onGeneratePlan, loading = false }) => {
           </Paper>
         </Grid>
 
+        {/* Focus Principles */}
+        <Grid item xs={12}>
+          <Paper sx={{ p: 3, backgroundColor: 'var(--color-background-secondary)' }}>
+            <Typography variant="h6" sx={{ 
+              mb: 2, 
+              display: 'flex', 
+              alignItems: 'center', 
+              gap: 1,
+              color: 'var(--color-text-primary)'
+            }}>
+              <TrendingUpOutlined />
+              Focus Principles (max 7)
+            </Typography>
+            <Typography variant="body2" sx={{ 
+              mb: 3, 
+              color: 'var(--color-text-secondary)',
+              fontStyle: 'italic'
+            }}>
+              Select specific principles to focus on during training. These will override the auto-selected principles based on your focus percentages.
+            </Typography>
+            
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+              {['attacking', 'defending', 'transition'].map(section => {
+                const list = principlesData.principles_of_play[section] || [];
+                return (
+                  <Box key={section}>
+                    <Typography variant="caption" sx={{ 
+                      textTransform: 'uppercase', 
+                      fontWeight: 600, 
+                      letterSpacing: 0.5,
+                      color: 'var(--color-text-primary)',
+                      display: 'block',
+                      mb: 1
+                    }}>
+                      {section}
+                    </Typography>
+                    <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+                      {list.map(p => {
+                        const active = selectedPrinciples.includes(p.name);
+                        const isDisabled = !active && selectedPrinciples.length >= 7;
+                        return (
+                          <Chip
+                            key={p.name}
+                            label={p.name}
+                            size="small"
+                            color={active ? 'primary' : 'default'}
+                            variant={active ? 'filled' : 'outlined'}
+                            onClick={() => handlePrincipleToggle(p.name)}
+                            disabled={isDisabled}
+                            sx={{
+                              '&:hover': {
+                                backgroundColor: active ? 'var(--color-primary-hover)' : 'var(--color-background-primary)'
+                              }
+                            }}
+                          />
+                        );
+                      })}
+                    </Box>
+                  </Box>
+                );
+              })}
+            </Box>
+            
+          </Paper>
+        </Grid>
+
         {/* Generate Button */}
         <Grid item xs={12}>
           <Divider sx={{ my: 2 }} />
           <Box sx={{ textAlign: 'center' }}>
+            <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 2, mb: 2 }}>
+              <PlanSettingsForm 
+                settings={planSettings}
+                onSettingsChange={setPlanSettings}
+                disabled={loading}
+                showAsDialog={true}
+              />
+            </Box>
             <Button
               variant="contained"
               size="large"

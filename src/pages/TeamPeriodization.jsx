@@ -5,7 +5,6 @@ import EditOutlinedIcon from '@mui/icons-material/EditOutlined';
 import CloseOutlinedIcon from '@mui/icons-material/CloseOutlined';
 import CheckOutlinedIcon from '@mui/icons-material/CheckOutlined';
 import AssessmentOutlinedIcon from '@mui/icons-material/AssessmentOutlined';
-import SettingsOutlinedIcon from '@mui/icons-material/SettingsOutlined';
 import DrillEditModal from '../components/DrillEditModal';
 import squads from '../data/squads_teams.json'; // Add this import for team data
 import games from '../data/games_matches.json';
@@ -49,27 +48,8 @@ function TeamPeriodization({ onHeaderControlsChange }) {
   const [teamFixtures, setTeamFixtures] = useState([]); // State for fixtures from Supabase
   const tabsRef = useRef(null);
   const [openReport, setOpenReport] = useState(false);
-  const [openSettings, setOpenSettings] = useState(false); // State for settings dialog
   const [loadEditAnchor, setLoadEditAnchor] = useState(null); // anchor for per-day load edit menu
   const [loadEditDayIndex, setLoadEditDayIndex] = useState(null);
-  // Settings state
-  const [settings, setSettings] = useState(() => {
-    try {
-      const raw = localStorage.getItem('plan-settings');
-      if (raw) return JSON.parse(raw);
-    } catch {}
-    return {
-      variability: 'medium', // low | medium | high
-      objective: '',
-      selectedPrinciples: [], // array of principle names (cap 7)
-      generationMode: 'curated' // curated | hybrid | generative
-    };
-  });
-  const saveSettings = (next) => {
-    setSettings(next);
-    try { localStorage.setItem('plan-settings', JSON.stringify(next)); } catch {}
-  };
-  const variabilityNumeric = useMemo(() => settings.variability === 'high' ? 0.85 : settings.variability === 'low' ? 0.35 : 0.6, [settings.variability]);
   // Analytics memo: derives counts when plan updates
   const analytics = useMemo(() => {
     if (!plan || !plan.sessions) return null;
@@ -160,10 +140,10 @@ function TeamPeriodization({ onHeaderControlsChange }) {
       startDate, 
       endDate: effectiveEnd, 
       fixtures: teamFixtures,
-      objective: settings.objective || undefined,
-      variability: settings.variability,
-      generationMode: settings.generationMode || 'curated',
-      userSelectedPrinciples: settings.selectedPrinciples && settings.selectedPrinciples.length ? settings.selectedPrinciples : undefined
+      objective: plan?.settings?.objective || undefined,
+      variability: plan?.settings?.variability || 'medium',
+      generationMode: plan?.settings?.generationMode || 'curated',
+      userSelectedPrinciples: plan?.settings?.selectedPrinciples && plan?.settings?.selectedPrinciples.length ? plan?.settings?.selectedPrinciples : undefined
     };
     const generatedPlan = await generateHighLevelTeamPlan(selectedTeamId, options);
     if (generatedPlan.total_days && generatedPlan.total_days > 42) {
@@ -175,14 +155,14 @@ function TeamPeriodization({ onHeaderControlsChange }) {
       setPlanTitle(`${startDate} → ${effectiveEnd}`);
     }
     setLoading(false);
-  }, [selectedTeamId, startDate, endDate, teamFixtures, settings]);
+  }, [selectedTeamId, startDate, endDate, teamFixtures]);
 
   const handleGenerateDrillsForSession = async (sessionIdx) => {
     if (!plan) return;
     setGeneratingSessionIdx(sessionIdx);
     try {
       const before = JSON.stringify(plan.sessions[sessionIdx]);
-      await generateSessionDrills(plan, sessionIdx, { variability: settings.variability });
+      await generateSessionDrills(plan, sessionIdx, { variability: plan?.settings?.variability || 'medium' });
       const after = plan.sessions[sessionIdx];
       const anyDrills = after?.phases?.some(ph => ph.drills && ph.drills.length);
       setPlan({ ...plan, sessions: [...plan.sessions] });
@@ -202,7 +182,7 @@ function TeamPeriodization({ onHeaderControlsChange }) {
     for (let i = 0; i < plan.sessions.length; i++) {
       if (!plan.sessions[i].drills_generated) {
         try { 
-          await generateSessionDrills(plan, i, { variability: settings.variability }); 
+          await generateSessionDrills(plan, i, { variability: plan?.settings?.variability || 'medium' }); 
           const any = plan.sessions[i]?.phases?.some(ph => ph.drills && ph.drills.length);
           if (!any) emptyCount++;
         } catch (e) { console.warn('Drill gen failed for session', i, e); emptyCount++; }
@@ -296,18 +276,6 @@ function TeamPeriodization({ onHeaderControlsChange }) {
           onChange={(e) => setEndDate(e.target.value)}
           InputLabelProps={{ shrink: true }}
         />
-        <Tooltip title="Plan settings (apply before Generate)">
-          <span>
-            <IconButton
-              size="small"
-              color="default"
-              onClick={() => setOpenSettings(true)}
-              sx={{ border: '1px solid var(--color-border-primary)', background:'var(--color-background-secondary)' }}
-            >
-              <SettingsOutlinedIcon fontSize="small" />
-            </IconButton>
-          </span>
-        </Tooltip>
       </Box>
       <Box sx={{ flex: 1 }} />
       <Box sx={{ display: 'flex', gap: 'var(--spacing-md)', alignItems: 'center' }}>
@@ -1305,6 +1273,118 @@ function TeamPeriodization({ onHeaderControlsChange }) {
           {!analytics && (<Typography variant="body2">Generate drills to populate analytics.</Typography>)}
           {analytics && (
             <Box sx={{ display:'flex', flexDirection:'column', gap:4 }}>
+              {/* Plan Input Parameters */}
+              {plan.coachRequirements && (
+                <Box>
+                  <Typography variant="h6" sx={{ mb: 2, display: 'flex', alignItems: 'center', gap: 1 }}>
+                    Plan Input Parameters
+                  </Typography>
+                  <Paper sx={{ p: 3, backgroundColor: 'var(--color-background-secondary)', border: '1px solid var(--color-border-primary)' }}>
+                    <Grid container spacing={3}>
+                      {/* Date Range */}
+                      <Grid item xs={12} sm={6}>
+                        <Typography variant="subtitle2" sx={{ mb: 1, color: 'var(--color-text-primary)' }}>
+                          Training Period
+                        </Typography>
+                        <Typography variant="body2" sx={{ color: 'var(--color-text-secondary)' }}>
+                          {plan.coachRequirements.startDate && plan.coachRequirements.endDate ? (
+                            `${new Date(plan.coachRequirements.startDate).toLocaleDateString()} - ${new Date(plan.coachRequirements.endDate).toLocaleDateString()}`
+                          ) : (
+                            'Date range not specified'
+                          )}
+                        </Typography>
+                      </Grid>
+
+                      {/* Session Duration */}
+                      <Grid item xs={12} sm={6}>
+                        <Typography variant="subtitle2" sx={{ mb: 1, color: 'var(--color-text-primary)' }}>
+                          Session Duration
+                        </Typography>
+                        <Typography variant="body2" sx={{ color: 'var(--color-text-secondary)' }}>
+                          {plan.coachRequirements.sessionDuration || 90} minutes
+                        </Typography>
+                      </Grid>
+
+                      {/* Focus Distribution */}
+                      <Grid item xs={12}>
+                        <Typography variant="subtitle2" sx={{ mb: 2, color: 'var(--color-text-primary)' }}>
+                          Learning Focus Distribution
+                        </Typography>
+                        {plan.coachRequirements.focusPercentages && (
+                          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                            {Object.entries(plan.coachRequirements.focusPercentages)
+                              .filter(([_, percentage]) => percentage > 0)
+                              .sort(([_, a], [__, b]) => b - a)
+                              .map(([principle, percentage]) => (
+                                <Box key={principle} sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                                  <Typography variant="body2" sx={{ 
+                                    minWidth: 120, 
+                                    textTransform: 'capitalize',
+                                    color: 'var(--color-text-primary)'
+                                  }}>
+                                    {principle.replace('-', ' ')}
+                                  </Typography>
+                                  <Box sx={{ flex: 1, display: 'flex', alignItems: 'center', gap: 1 }}>
+                                    <Box sx={{ 
+                                      flex: 1, 
+                                      height: 8, 
+                                      backgroundColor: 'var(--color-border-primary)', 
+                                      borderRadius: 4,
+                                      overflow: 'hidden'
+                                    }}>
+                                      <Box sx={{ 
+                                        width: `${percentage}%`, 
+                                        height: '100%', 
+                                        backgroundColor: 'var(--color-primary)',
+                                        transition: 'width 0.3s ease'
+                                      }} />
+                                    </Box>
+                                    <Typography variant="body2" sx={{ 
+                                      minWidth: 40, 
+                                      textAlign: 'right',
+                                      fontWeight: 'var(--font-weight-medium)',
+                                      color: 'var(--color-primary)'
+                                    }}>
+                                      {percentage}%
+                                    </Typography>
+                                  </Box>
+                                </Box>
+                              ))}
+                            <Box sx={{ 
+                              mt: 2, 
+                              p: 2, 
+                              backgroundColor: 'var(--color-background-primary)', 
+                              borderRadius: 'var(--radius-md)',
+                              border: '1px solid var(--color-border-primary)'
+                            }}>
+                              <Typography variant="body2" sx={{ 
+                                color: 'var(--color-text-primary)',
+                                fontWeight: 'var(--font-weight-medium)',
+                                textAlign: 'center'
+                              }}>
+                                Total: {Object.values(plan.coachRequirements.focusPercentages).reduce((sum, val) => sum + val, 0)}%
+                                {Object.values(plan.coachRequirements.focusPercentages).reduce((sum, val) => sum + val, 0) === 100 ? ' ✓' : ''}
+                              </Typography>
+                            </Box>
+                          </Box>
+                        )}
+                      </Grid>
+
+                      {/* AI Schedule Info */}
+                      {plan.coachRequirements.aiSchedule && (
+                        <Grid item xs={12}>
+                          <Typography variant="subtitle2" sx={{ mb: 1, color: 'var(--color-text-primary)' }}>
+                            AI-Generated Schedule
+                          </Typography>
+                          <Typography variant="body2" sx={{ color: 'var(--color-text-secondary)' }}>
+                            {plan.coachRequirements.aiSchedule.rationale || 'AI-determined optimal session distribution'}
+                          </Typography>
+                        </Grid>
+                      )}
+                    </Grid>
+                  </Paper>
+                </Box>
+              )}
               {/* Load Undulation Visuals */}
               <Box>
                 <Typography variant="h6" sx={{ mb:1, fontSize:'14px' }}>Load Undulation</Typography>
@@ -1469,119 +1549,6 @@ function TeamPeriodization({ onHeaderControlsChange }) {
         </DialogContent>
         <DialogActions>
           <Button onClick={()=>setOpenReport(false)}>Close</Button>
-        </DialogActions>
-      </Dialog>
-      <Dialog open={openSettings} onClose={()=> setOpenSettings(false)} fullWidth maxWidth="sm">
-        <DialogTitle>Plan Settings</DialogTitle>
-        <DialogContent dividers sx={{ display:'flex', flexDirection:'column', gap:3 }}>
-          {plan && (
-            <Alert severity="info" variant="outlined" sx={{ fontSize:'12px' }}>
-              These settings were applied to the current plan. Changes now will only affect the next generation. Regenerate to apply new values.
-            </Alert>
-          )}
-          <Box>
-            <Typography variant="subtitle2" gutterBottom>Variability (Model Flexibility)</Typography>
-            <Box sx={{ display:'flex', gap:1 }}>
-              {['low','medium','high'].map(level => {
-                const active = settings.variability===level;
-                return (
-                  <Chip key={level} clickable={!plan} disabled={!!plan} color={active? 'primary':'default'} label={level} onClick={()=> !plan && saveSettings({ ...settings, variability: level })} size="small" />
-                );
-              })}
-            </Box>
-            <Typography variant="caption" color="text.secondary" sx={{ mt:1, display:'block' }}>
-              Controls how adventurous drill selection is (affects sampling temperature & diversity penalties).
-            </Typography>
-          </Box>
-          <Box>
-            <Typography variant="subtitle2" gutterBottom>Plan Objective</Typography>
-            <TextField
-              placeholder="e.g. Improve high press & rapid transition to attack"
-              value={settings.objective}
-              onChange={(e)=> !plan && saveSettings({ ...settings, objective: e.target.value })}
-              fullWidth
-              multiline
-              minRows={2}
-              disabled={!!plan}
-            />
-            <Typography variant="caption" color="text.secondary" sx={{ mt:1, display:'block' }}>
-              Incorporated into AI summary & rationale generation.
-            </Typography>
-          </Box>
-          <Box>
-            <Typography variant="subtitle2" gutterBottom>Drill Generation Mode</Typography>
-            <Box sx={{ display:'flex', gap:1, flexWrap:'wrap' }}>
-              {[
-                { key:'curated', label:'Curated', tip:'Only use vetted drills library (stable, repeatable).'},
-                { key:'hybrid', label:'Hybrid', tip:'Mix vetted drills with some AI-created drills (balanced).'},
-                { key:'generative', label:'Generative', tip:'Allow full AI creation of drills (novel, may need review).'}
-              ].map(opt => {
-                const active = settings.generationMode === opt.key;
-                return (
-                  <Tooltip key={opt.key} title={opt.tip} arrow>
-                    <span>
-                      <Chip
-                        clickable={!plan}
-                        disabled={!!plan}
-                        color={active? 'primary':'default'}
-                        label={opt.label}
-                        onClick={()=> !plan && saveSettings({ ...settings, generationMode: opt.key })}
-                        size="small"
-                        variant={active? 'filled':'outlined'}
-                      />
-                    </span>
-                  </Tooltip>
-                );
-              })}
-            </Box>
-            <Typography variant="caption" color="text.secondary" sx={{ mt:1, display:'block' }}>
-              Curated = safest. Hybrid = some novelty. Generative = maximum creativity (JSON-validated, may produce imperfect drills; edit as needed).
-            </Typography>
-          </Box>
-          <Box>
-            <Typography variant="subtitle2" gutterBottom>Focus Principles (max 7)</Typography>
-            <Box sx={{ display:'flex', flexDirection:'column', gap:2 }}>
-              {['attacking','defending','transition'].map(section => {
-                const list = principlesData.principles_of_play[section] || [];
-                return (
-                  <Box key={section}>
-                    <Typography variant="caption" sx={{ textTransform:'uppercase', fontWeight:600, letterSpacing:0.5 }}>{section}</Typography>
-                    <Box sx={{ display:'flex', flexWrap:'wrap', gap:0.5, mt:0.5 }}>
-                      {list.map(p => {
-                        const active = settings.selectedPrinciples.includes(p.name);
-                        const disabled = (!!plan) || (!active && settings.selectedPrinciples.length >= 7);
-                        return (
-                          <Chip
-                            key={p.name}
-                            label={p.name}
-                            size="small"
-                            color={active? 'primary':'default'}
-                            variant={active? 'filled':'outlined'}
-                            onClick={()=> {
-                              if (plan) return; // locked after generation
-                              if (active) {
-                                saveSettings({ ...settings, selectedPrinciples: settings.selectedPrinciples.filter(n => n !== p.name) });
-                              } else if (!disabled) {
-                                saveSettings({ ...settings, selectedPrinciples: [...settings.selectedPrinciples, p.name] });
-                              }
-                            }}
-                            disabled={disabled}
-                          />
-                        );
-                      })}
-                    </Box>
-                  </Box>
-                );
-              })}
-            </Box>
-            <Typography variant="caption" color="text.secondary" sx={{ mt:1, display:'block' }}>
-              Overrides auto-selected subset when generating a new plan.
-            </Typography>
-          </Box>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={()=> setOpenSettings(false)}>Close</Button>
-          <Button variant="contained" onClick={()=> { setOpenSettings(false); }}>Done</Button>
         </DialogActions>
       </Dialog>
       <Snackbar open={snackbar.open} autoHideDuration={6000} onClose={() => setSnackbar({ ...snackbar, open: false })}>
