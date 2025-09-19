@@ -21,6 +21,7 @@ import {
   ScheduleOutlined
 } from '@mui/icons-material';
 import CoachInputForm from '../components/CoachInputForm';
+import SmartCoachInputForm from '../components/SmartCoachInputForm';
 import PrincipleBreakdown from '../components/PrincipleBreakdown';
 import SimplifiedSessionDisplay from '../components/SimplifiedSessionDisplay';
 import QuickTemplates from '../components/QuickTemplates';
@@ -36,6 +37,7 @@ const IdealMVP = () => {
   const [regenerating, setRegenerating] = useState(false);
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
   const [showTemplates, setShowTemplates] = useState(false);
+  const [useSmartInput, setUseSmartInput] = useState(true);
 
   const steps = [
     { label: 'Set Requirements', icon: <SportsSoccerOutlined /> },
@@ -51,15 +53,23 @@ const IdealMVP = () => {
       // Calculate principle percentages based on priorities
       const principlePercentages = calculatePrinciplePercentages(data);
       
-      // Generate the high-level plan
-      const plan = await generateHighLevelTeamPlan(data.teamId, {
+      // Generate the high-level plan with AI-determined schedule
+      const planOptions = {
         weeks: data.planDuration,
-        startDate: new Date().toISOString().split('T')[0],
+        startDate: data.startDate || new Date().toISOString().split('T')[0],
         objective: `Focus on ${data.primaryFocus} (primary), ${data.secondaryFocus} (secondary), ${data.tertiaryFocus} (tertiary)`,
         userSelectedPrinciples: [data.primaryFocus, data.secondaryFocus, data.tertiaryFocus],
         variability: 'medium',
         generationMode: 'curated'
-      });
+      };
+
+      // If AI schedule is provided, pass fixtures to the AI
+      if (data.aiSchedule && data.fixtures) {
+        planOptions.fixtures = data.fixtures;
+        planOptions.aiSchedule = data.aiSchedule;
+      }
+
+      const plan = await generateHighLevelTeamPlan(data.teamId, planOptions);
 
       // Add our calculated percentages to the plan
       plan.principlePercentages = principlePercentages;
@@ -173,7 +183,12 @@ const IdealMVP = () => {
             <QuickTemplates onSelectTemplate={handleTemplateSelect} />
           );
         }
-        return (
+        return useSmartInput ? (
+          <SmartCoachInputForm 
+            onGeneratePlan={handleGeneratePlan}
+            loading={loading}
+          />
+        ) : (
           <CoachInputForm 
             onGeneratePlan={handleGeneratePlan}
             loading={loading}
@@ -293,22 +308,40 @@ const IdealMVP = () => {
       <Box sx={{ mb: 4 }}>
         {currentStep === 0 && (
           <Box sx={{ textAlign: 'center', mb: 3 }}>
-            <Button
-              variant={showTemplates ? "outlined" : "contained"}
-              onClick={() => setShowTemplates(!showTemplates)}
-              sx={{
-                mr: 2,
-                backgroundColor: showTemplates ? 'transparent' : 'var(--color-primary)',
-                color: showTemplates ? 'var(--color-primary)' : 'white',
-                borderColor: 'var(--color-primary)',
-                '&:hover': {
-                  backgroundColor: showTemplates ? 'var(--color-primary-light)' : 'var(--color-primary-hover)',
-                  color: 'white'
-                }
-              }}
-            >
-              {showTemplates ? 'Custom Plan' : 'Quick Templates'}
-            </Button>
+            <Box sx={{ display: 'flex', gap: 2, justifyContent: 'center', flexWrap: 'wrap' }}>
+              <Button
+                variant={showTemplates ? "outlined" : "contained"}
+                onClick={() => setShowTemplates(!showTemplates)}
+                sx={{
+                  backgroundColor: showTemplates ? 'transparent' : 'var(--color-primary)',
+                  color: showTemplates ? 'var(--color-primary)' : 'white',
+                  borderColor: 'var(--color-primary)',
+                  '&:hover': {
+                    backgroundColor: showTemplates ? 'var(--color-primary-light)' : 'var(--color-primary-hover)',
+                    color: 'white'
+                  }
+                }}
+              >
+                {showTemplates ? 'Custom Plan' : 'Quick Templates'}
+              </Button>
+              {!showTemplates && (
+                <Button
+                  variant={useSmartInput ? "contained" : "outlined"}
+                  onClick={() => setUseSmartInput(!useSmartInput)}
+                  sx={{
+                    backgroundColor: useSmartInput ? 'var(--color-success)' : 'transparent',
+                    color: useSmartInput ? 'white' : 'var(--color-success)',
+                    borderColor: 'var(--color-success)',
+                    '&:hover': {
+                      backgroundColor: useSmartInput ? 'var(--color-success-dark)' : 'var(--color-success-light)',
+                      color: 'white'
+                    }
+                  }}
+                >
+                  {useSmartInput ? 'AI Schedule' : 'Manual Input'}
+                </Button>
+              )}
+            </Box>
           </Box>
         )}
         {renderStepContent()}
