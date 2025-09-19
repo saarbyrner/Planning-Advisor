@@ -4,14 +4,17 @@ import {
   Container, 
   Typography, 
   Alert,
-  Snackbar
+  Snackbar,
+  IconButton,
+  Tooltip
 } from '@mui/material';
+import { ArrowBackOutlined } from '@mui/icons-material';
 import SmartCoachInputForm from '../components/SmartCoachInputForm';
 import { generateHighLevelTeamPlan } from '../utils/generatePlan';
 import { saveTeamPlan, getTeamFixtures } from '../utils/supabase';
 import { useNavigate } from 'react-router-dom';
 
-const IdealMVP = () => {
+const IdealMVP = ({ onBack }) => {
   const navigate = useNavigate();
   const [formData, setFormData] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -92,18 +95,18 @@ const IdealMVP = () => {
         severity: 'success' 
       });
       
-      // Redirect immediately to team planning page with the saved plan
-      const redirectUrl = `/team-planning?planId=${savedPlan.id}`;
-      console.log('Redirecting to:', redirectUrl); // Debug log
-      
-      try {
-        navigate(redirectUrl);
-        console.log('Navigate called successfully');
-      } catch (navError) {
-        console.error('Navigation error:', navError);
-        // Fallback to window.location
-        window.location.href = redirectUrl;
-      }
+        // Redirect to team planning page with the saved plan
+        const redirectUrl = `/team-planning?planId=${savedPlan.id}`;
+        console.log('Redirecting to:', redirectUrl); // Debug log
+        
+        try {
+          navigate(redirectUrl);
+          console.log('Navigate called successfully');
+        } catch (navError) {
+          console.error('Navigation error:', navError);
+          // Fallback to window.location
+          window.location.href = redirectUrl;
+        }
     } catch (error) {
       console.error('Error generating plan:', error);
       setSnackbar({ 
@@ -139,10 +142,28 @@ const IdealMVP = () => {
 
   return (
     <Container maxWidth="xl" sx={{ py: 4 }}>
-
-      {/* Progress Stepper */}
-      <Box sx={{ mb: 4 }}>
-        {/* Stepper removed - redirecting immediately after generation */}
+      {/* Header with Back Button */}
+      <Box sx={{ display: 'flex', alignItems: 'center', mb: 4 }}>
+        {onBack && (
+          <Tooltip title="Back to plans">
+            <IconButton 
+              onClick={onBack}
+              sx={{ 
+                mr: 2,
+                color: 'var(--color-text-primary)',
+                '&:hover': { backgroundColor: 'var(--color-background-secondary)' }
+              }}
+            >
+              <ArrowBackOutlined />
+            </IconButton>
+          </Tooltip>
+        )}
+        <Typography variant="h4" sx={{ 
+          fontWeight: 'var(--font-weight-semibold)',
+          color: 'var(--color-text-primary)'
+        }}>
+          Create New Training Plan
+        </Typography>
       </Box>
 
       {/* Main Content */}

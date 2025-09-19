@@ -94,13 +94,6 @@ const navigationItems = [
     path: '/plan-management',
     section: 'main'
   },
-  { 
-    id: 'ideal-mvp', 
-    label: 'Ideal MVP', 
-    icon: FolderOpenOutlined, 
-    path: '/ideal-mvp',
-    section: 'main'
-  }
 ]
 
 const bottomItems = [

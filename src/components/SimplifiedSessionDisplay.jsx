@@ -20,14 +20,20 @@ import {
   EditOutlined,
   RefreshOutlined
 } from '@mui/icons-material';
+import { useState } from 'react';
+import DrillEditModal from './DrillEditModal';
 
 const SimplifiedSessionDisplay = ({ 
   sessions = [], 
   selectedSession = 0, 
   onSessionSelect,
   onRegenerateSession,
+  onDrillEdit,
   regenerating = false
 }) => {
+  const [editModalOpen, setEditModalOpen] = useState(false);
+  const [editingDrill, setEditingDrill] = useState(null);
+  const [editingDrillContext, setEditingDrillContext] = useState(null);
   if (!sessions || sessions.length === 0) {
     return (
       <Card sx={{ p: 4, textAlign: 'center' }}>
@@ -93,6 +99,28 @@ const SimplifiedSessionDisplay = ({
     }
     
     return `${phase.name} - ${drillCount} drill${drillCount > 1 ? 's' : ''} (${duration} min)`;
+  };
+
+  const handleEditDrill = (drill, phaseIndex, drillIndex) => {
+    setEditingDrill(drill);
+    setEditingDrillContext({
+      sessionIndex: selectedSession,
+      phaseIndex,
+      drillIndex
+    });
+    setEditModalOpen(true);
+  };
+
+  const handleSaveDrill = (editedDrill, sessionIndex, phaseIndex, drillIndex) => {
+    if (onDrillEdit) {
+      onDrillEdit(editedDrill, sessionIndex, phaseIndex, drillIndex);
+    }
+  };
+
+  const handleCloseEditModal = () => {
+    setEditModalOpen(false);
+    setEditingDrill(null);
+    setEditingDrillContext(null);
   };
 
   return (
@@ -294,11 +322,25 @@ const SimplifiedSessionDisplay = ({
                         }}>
                           {drill.name}
                         </Typography>
-                        <Chip 
-                          label={`${drill.duration} min`}
-                          size="small"
-                          variant="outlined"
-                        />
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                          <Chip 
+                            label={`${drill.duration} min`}
+                            size="small"
+                            variant="outlined"
+                          />
+                          <Tooltip title="Edit drill">
+                            <IconButton 
+                              size="small"
+                              onClick={() => handleEditDrill(drill, index, drillIndex)}
+                              sx={{ 
+                                color: 'var(--color-primary)',
+                                '&:hover': { backgroundColor: 'var(--color-primary-light)' }
+                              }}
+                            >
+                              <EditOutlined fontSize="small" />
+                            </IconButton>
+                          </Tooltip>
+                        </Box>
                       </Box>
                       <Typography variant="body2" sx={{ 
                         color: 'var(--color-text-secondary)',
@@ -346,6 +388,17 @@ const SimplifiedSessionDisplay = ({
           </Accordion>
         ))}
       </Box>
+
+      {/* Drill Edit Modal */}
+      <DrillEditModal
+        open={editModalOpen}
+        onClose={handleCloseEditModal}
+        drill={editingDrill}
+        onSave={handleSaveDrill}
+        sessionIndex={editingDrillContext?.sessionIndex}
+        phaseIndex={editingDrillContext?.phaseIndex}
+        drillIndex={editingDrillContext?.drillIndex}
+      />
     </Box>
   );
 };

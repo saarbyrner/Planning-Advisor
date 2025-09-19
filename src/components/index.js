@@ -14,6 +14,7 @@ export { default as AthleteDataGrid } from './AthleteDataGrid'
 export { default as SmartCoachInputForm } from './SmartCoachInputForm'
 export { default as PrincipleBreakdown } from './PrincipleBreakdown'
 export { default as SimplifiedSessionDisplay } from './SimplifiedSessionDisplay'
+export { default as DrillEditModal } from './DrillEditModal'
 
 // Usage Examples:
 // import { Button, Icon, Card, PlayerAvatar, LogoImage } from '../components'

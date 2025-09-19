@@ -39,6 +39,7 @@ import {
 import { useNavigate } from 'react-router-dom';
 import { getAllTeamPlans, deleteTeamPlan, updateTeamPlanTitle } from '../utils/supabase';
 import squads from '../data/squads_teams.json';
+import IdealMVP from './IdealMVP';
 
 function PlanManagement() {
   // Component state initialization
@@ -54,6 +55,7 @@ function PlanManagement() {
   const [apiKeyDialogOpen, setApiKeyDialogOpen] = useState(false);
   const [apiKey, setApiKey] = useState('');
   const [savingApiKey, setSavingApiKey] = useState(false);
+  const [showIdealMVP, setShowIdealMVP] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -207,8 +209,14 @@ function PlanManagement() {
   };
 
   const handleCreateNewPlan = () => {
-    // Navigate to the Planning Advisor page to create a new plan
-    navigate('/team-planning?new=true');
+    // Show the Ideal MVP form to create a new plan
+    setShowIdealMVP(true);
+  };
+
+  const handleBackToPlans = () => {
+    // Return to the plans list and refresh
+    setShowIdealMVP(false);
+    handleRefresh();
   };
 
   const handleEditTitle = (plan) => {
@@ -299,6 +307,11 @@ function PlanManagement() {
         <Alert severity="error">{error}</Alert>
       </Box>
     );
+  }
+
+  // If showing Ideal MVP, render it instead of the plans list
+  if (showIdealMVP) {
+    return <IdealMVP onBack={handleBackToPlans} />;
   }
 
   return (

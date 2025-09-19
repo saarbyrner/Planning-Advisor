@@ -6,6 +6,7 @@ import CloseOutlinedIcon from '@mui/icons-material/CloseOutlined';
 import CheckOutlinedIcon from '@mui/icons-material/CheckOutlined';
 import AssessmentOutlinedIcon from '@mui/icons-material/AssessmentOutlined';
 import SettingsOutlinedIcon from '@mui/icons-material/SettingsOutlined';
+import DrillEditModal from '../components/DrillEditModal';
 import squads from '../data/squads_teams.json'; // Add this import for team data
 import games from '../data/games_matches.json';
 import { BarChart } from '@mui/x-charts/BarChart'; // Existing usage
@@ -32,6 +33,9 @@ function TeamPeriodization({ onHeaderControlsChange }) {
   const [editingField, setEditingField] = useState(null); // Track editing: { sessionIdx, phaseIdx, drillIdx, field }
   const [openDrillPanel, setOpenDrillPanel] = useState(false);
   const [editingDrill, setEditingDrill] = useState(null); // { sessionIdx, phaseIdx, drillIdx, data }
+  const [drillEditModalOpen, setDrillEditModalOpen] = useState(false);
+  const [editingDrillData, setEditingDrillData] = useState(null);
+  const [editingDrillContext, setEditingDrillContext] = useState(null);
   const [searchParams] = useSearchParams();
   const planId = searchParams.get('planId');
   const isNewPlan = searchParams.get('new') === 'true';
@@ -207,6 +211,53 @@ function TeamPeriodization({ onHeaderControlsChange }) {
     setPlan({ ...plan, sessions: [...plan.sessions] });
     setGeneratingAll(false);
     setSnackbar({ open: true, message: emptyCount ? `All sessions processed. ${emptyCount} had no drills.` : 'Drills generated for all sessions', severity: emptyCount ? 'warning' : 'success' });
+  };
+
+  const handleEditDrill = (drill, sessionIndex, phaseIndex, drillIndex) => {
+    setEditingDrillData(drill);
+    setEditingDrillContext({ sessionIndex, phaseIndex, drillIndex });
+    setDrillEditModalOpen(true);
+  };
+
+  const handleSaveDrill = async (editedDrill, sessionIndex, phaseIndex, drillIndex) => {
+    if (!plan) return;
+    
+    const updatedPlan = { ...plan };
+    updatedPlan.sessions = [...updatedPlan.sessions];
+    updatedPlan.sessions[sessionIndex] = { ...updatedPlan.sessions[sessionIndex] };
+    updatedPlan.sessions[sessionIndex].phases = [...updatedPlan.sessions[sessionIndex].phases];
+    updatedPlan.sessions[sessionIndex].phases[phaseIndex] = { 
+      ...updatedPlan.sessions[sessionIndex].phases[phaseIndex] 
+    };
+    updatedPlan.sessions[sessionIndex].phases[phaseIndex].drills = [
+      ...updatedPlan.sessions[sessionIndex].phases[phaseIndex].drills
+    ];
+    updatedPlan.sessions[sessionIndex].phases[phaseIndex].drills[drillIndex] = editedDrill;
+    
+    setPlan(updatedPlan);
+    
+    // Auto-save the plan to persist the drill changes
+    try {
+      await saveTeamPlan(selectedTeamId, updatedPlan, planTitle);
+      setSnackbar({ 
+        open: true, 
+        message: 'Drill updated and saved successfully', 
+        severity: 'success' 
+      });
+    } catch (error) {
+      console.error('Error saving drill changes:', error);
+      setSnackbar({ 
+        open: true, 
+        message: 'Drill updated but failed to save. Please save manually.', 
+        severity: 'warning' 
+      });
+    }
+  };
+
+  const handleCloseDrillEditModal = () => {
+    setDrillEditModalOpen(false);
+    setEditingDrillData(null);
+    setEditingDrillContext(null);
   };
 
   // Create header controls for team planning (depends on handlers above)
@@ -1066,10 +1117,22 @@ function TeamPeriodization({ onHeaderControlsChange }) {
 
                                return (
                                  <Box key={dIdx} sx={{ mb: 'var(--spacing-sm)', p: 'var(--spacing-sm)', backgroundColor: 'var(--color-background-secondary)', borderRadius: 'var(--radius-sm)' }}>
-                                   <Box sx={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '4px' }}>
+                                   <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '4px' }}>
                                      <Typography component="span" variant="body2" sx={{ fontWeight: 'var(--font-weight-medium)' }}>
                                        {drill.name} ({drill.duration} mins)
                                      </Typography>
+                                     <Tooltip title="Edit drill">
+                                       <IconButton 
+                                         size="small"
+                                         onClick={() => handleEditDrill(drill, selectedSession, pIdx, dIdx)}
+                                         sx={{ 
+                                           color: 'var(--color-primary)',
+                                           '&:hover': { backgroundColor: 'var(--color-primary-light)' }
+                                         }}
+                                       >
+                                         <EditOutlinedIcon fontSize="small" />
+                                       </IconButton>
+                                     </Tooltip>
                                    </Box>
                                    
                                    {drillSections.length > 0 ? (
@@ -1544,6 +1607,17 @@ function TeamPeriodization({ onHeaderControlsChange }) {
           }}>{lc}</MenuItem>
         ))}
       </Menu>
+
+      {/* Drill Edit Modal */}
+      <DrillEditModal
+        open={drillEditModalOpen}
+        onClose={handleCloseDrillEditModal}
+        drill={editingDrillData}
+        onSave={handleSaveDrill}
+        sessionIndex={editingDrillContext?.sessionIndex}
+        phaseIndex={editingDrillContext?.phaseIndex}
+        drillIndex={editingDrillContext?.drillIndex}
+      />
     </Box>
   );
 }
