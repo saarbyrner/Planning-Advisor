@@ -37,7 +37,7 @@ const IdealMVP = () => {
 
   const steps = [
     { label: 'Set Requirements', icon: <SportsSoccerOutlined /> },
-    { label: 'Review Plan Focus', icon: <TrendingUpOutlined /> },
+    { label: 'Review Focus', icon: <TrendingUpOutlined /> },
     { label: 'View Sessions', icon: <ScheduleOutlined /> }
   ];
 
@@ -221,7 +221,15 @@ const IdealMVP = () => {
                   <Grid item xs={12} sm={6} md={3}>
                     <Paper sx={{ p: 2, textAlign: 'center' }}>
                       <Typography variant="h4" sx={{ color: 'var(--color-primary)' }}>
-                        {formData?.planDuration || 0}
+                        {(() => {
+                          if (formData?.startDate && formData?.endDate) {
+                            const startDate = new Date(formData.startDate);
+                            const endDate = new Date(formData.endDate);
+                            const daysDiff = Math.ceil((endDate - startDate) / (1000 * 60 * 60 * 24)) + 1;
+                            return Math.ceil(daysDiff / 7);
+                          }
+                          return 0;
+                        })()}
                       </Typography>
                       <Typography variant="body2">Weeks</Typography>
                     </Paper>
