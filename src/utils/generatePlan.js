@@ -1234,10 +1234,13 @@ export async function generateTeamPlan(teamId, weeksOrOptions = 5) {
   // 1. Build timeline
   const timeline = buildTimeline(team, fixturesInRange, options);
 
+  // 2. Apply AI-driven periodization to timeline
+  await assignPeriodizedLoads(timeline, options.objective, options.userSelectedPrinciples);
+
   const totalDays = timeline.length;
   const durationDescriptor = options.endDate ? (totalDays + '-day') : (options.weeks + '-week');
 
-  // 2. Generate summary/principles
+  // 3. Generate summary/principles
   let meta;
   try {
     meta = await generateSummary(team, fixturesInRange, durationDescriptor, timeline, options.objective);
@@ -1247,7 +1250,7 @@ export async function generateTeamPlan(teamId, weeksOrOptions = 5) {
   let focus_principles = [];
   try { focus_principles = deriveFocusPrinciples(options.userSelectedPrinciples); } catch { focus_principles = []; }
 
-  // 3. Generate sessions sequentially (could be parallel but keep token moderation & ordering)
+  // 4. Generate sessions sequentially (could be parallel but keep token moderation & ordering)
   // Use new skeleton derivation then populate drills (legacy behavior) sequentially
   const sessions = timeline.map(day => deriveSessionSkeleton(day));
   for (let i = 0; i < sessions.length; i++) {
@@ -1258,7 +1261,7 @@ export async function generateTeamPlan(teamId, weeksOrOptions = 5) {
     }
   }
 
-  // 4. Validation
+  // 5. Validation
   const warnings = [];
   if (sessions.length !== timeline.length) warnings.push('Session count mismatch');
   sessions.forEach((s, idx) => {
