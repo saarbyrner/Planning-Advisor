@@ -83,19 +83,31 @@ function TeamPeriodization({ onHeaderControlsChange }) {
       
       if (planId) {
         // Load specific plan by ID
+        console.log('Loading plan with ID:', planId, 'type:', typeof planId);
         const allPlans = await getAllTeamPlans();
+        console.log('All plans:', allPlans);
         const specificPlan = allPlans.find(p => p.id == planId);
+        console.log('Found specific plan:', specificPlan);
         if (specificPlan) {
           // Ensure principles_of_play injected if absent (older saved plans)
           const hydrated = specificPlan.plan.principles_of_play ? specificPlan.plan : { ...specificPlan.plan, principles_of_play: principlesData.principles_of_play };
+          console.log('Setting plan:', hydrated);
           setPlan(hydrated);
           setSelectedTeamId(specificPlan.team_id);
           setPlanTitle(specificPlan.title || '');
           // Calculate weeks from timeline length
           if (specificPlan.plan.timeline) {
-            setStartDate(specificPlan.plan.start_date);
-            setEndDate(specificPlan.plan.end_date);
+            setStartDate(specificPlan.plan.start_date || specificPlan.plan.startDate);
+            setEndDate(specificPlan.plan.end_date || specificPlan.plan.endDate);
           }
+        } else {
+          console.log('Plan not found with ID:', planId);
+          // Show error message to user
+          setSnackbar({ 
+            open: true, 
+            message: `Plan with ID ${planId} not found. Please try generating a new plan.`, 
+            severity: 'error' 
+          });
         }
       } else {
         // Default behavior: don't load any plans automatically
@@ -643,7 +655,48 @@ function TeamPeriodization({ onHeaderControlsChange }) {
           </Box>
         </Card>
       )}
-      {loading && <Typography>Loading...</Typography>}
+      {loading && (
+        <Box sx={{ textAlign: 'center', py: 8 }}>
+          <Typography variant="h6" sx={{ mb: 2 }}>Loading plan...</Typography>
+          <Typography variant="body2" sx={{ color: 'var(--color-text-secondary)' }}>
+            Please wait while we load your training plan.
+          </Typography>
+        </Box>
+      )}
+      {!loading && !plan && planId && (
+        <Box sx={{ textAlign: 'center', py: 8 }}>
+          <Typography variant="h6" sx={{ mb: 2, color: 'var(--color-error)' }}>
+            Plan Not Found
+          </Typography>
+          <Typography variant="body2" sx={{ color: 'var(--color-text-secondary)', mb: 3 }}>
+            The plan with ID {planId} could not be found. It may have been deleted or the link is incorrect.
+          </Typography>
+          <Button 
+            variant="contained" 
+            onClick={() => window.location.href = '/ideal-mvp'}
+            sx={{ textTransform: 'none' }}
+          >
+            Generate New Plan
+          </Button>
+        </Box>
+      )}
+      {!loading && !plan && !planId && (
+        <Box sx={{ textAlign: 'center', py: 8 }}>
+          <Typography variant="h6" sx={{ mb: 2 }}>
+            No Plan Loaded
+          </Typography>
+          <Typography variant="body2" sx={{ color: 'var(--color-text-secondary)', mb: 3 }}>
+            Generate a new training plan or load an existing one to get started.
+          </Typography>
+          <Button 
+            variant="contained" 
+            onClick={() => window.location.href = '/ideal-mvp'}
+            sx={{ textTransform: 'none' }}
+          >
+            Generate New Plan
+          </Button>
+        </Box>
+      )}
       {plan && (
         <>
           {typeof plan === 'object' && plan.timeline && plan.sessions ? (
