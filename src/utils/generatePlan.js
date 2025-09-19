@@ -276,7 +276,18 @@ function buildTimeline(team, fixtures, { weeks, startDate, endDate }) {
     if (!raw) return;
     let key;
     try {
-      key = new Date(raw).toISOString().split('T')[0];
+      // Use local date parsing to avoid timezone issues
+      // If the date is already in YYYY-MM-DD format, use it directly
+      if (typeof raw === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(raw)) {
+        key = raw;
+      } else {
+        // For other formats, parse as local date and format consistently
+        const date = new Date(raw);
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        key = `${year}-${month}-${day}`;
+      }
     } catch {
       key = (raw + '').split('T')[0];
     }
@@ -298,7 +309,11 @@ function buildTimeline(team, fixtures, { weeks, startDate, endDate }) {
   let matchCounter = 0;
 
   const timeline = dates.map((d, idx) => {
-    const iso = d.toISOString().split('T')[0];
+    // Use local date formatting to match fixture date normalization
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    const iso = `${year}-${month}-${day}`;
     let fixture = fixtureMap.get(iso);
     // Fallback: try loose match if not found (e.g., original key had timezone causing off-by-one local shift)
     if (!fixture) {
