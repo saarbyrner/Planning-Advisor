@@ -21,7 +21,6 @@ import {
   ScheduleOutlined
 } from '@mui/icons-material';
 import SmartCoachInputForm from '../components/SmartCoachInputForm';
-import PrincipleBreakdown from '../components/PrincipleBreakdown';
 import SimplifiedSessionDisplay from '../components/SimplifiedSessionDisplay';
 import { generateHighLevelTeamPlan, generateSessionDrills } from '../utils/generatePlan';
 import { saveTeamPlan } from '../utils/supabase';
@@ -37,8 +36,7 @@ const IdealMVP = () => {
 
   const steps = [
     { label: 'Set Requirements', icon: <SportsSoccerOutlined /> },
-    { label: 'Review Focus', icon: <TrendingUpOutlined /> },
-    { label: 'View Sessions', icon: <ScheduleOutlined /> }
+    { label: 'Generated Plan', icon: <CheckCircleOutlined /> }
   ];
 
   const handleGeneratePlan = async (data) => {
@@ -122,21 +120,6 @@ const IdealMVP = () => {
     return improvements;
   };
 
-  const handleAdjustPercentages = (newPercentages) => {
-    if (generatedPlan) {
-      const updatedPlan = {
-        ...generatedPlan,
-        principlePercentages: newPercentages,
-        expectedImprovements: calculateExpectedImprovements(newPercentages)
-      };
-      setGeneratedPlan(updatedPlan);
-      setSnackbar({ 
-        open: true, 
-        message: 'Plan focus updated!', 
-        severity: 'success' 
-      });
-    }
-  };
 
   const handleRegenerateSession = async (sessionIndex) => {
     if (!generatedPlan) return;
@@ -181,65 +164,6 @@ const IdealMVP = () => {
           />
         );
       case 1:
-        return (
-          <Box sx={{ maxWidth: 1000, mx: 'auto' }}>
-            <PrincipleBreakdown 
-              principles={generatedPlan?.principlePercentages || {}}
-              onAdjustPercentages={handleAdjustPercentages}
-              expectedImprovements={generatedPlan?.expectedImprovements || {}}
-            />
-            {generatedPlan && (
-              <Card sx={{ mt: 3, p: 3 }}>
-                <Typography variant="h6" sx={{ mb: 2 }}>
-                  Plan Summary
-                </Typography>
-                <Grid container spacing={2}>
-                  <Grid item xs={12} sm={6} md={3}>
-                    <Paper sx={{ p: 2, textAlign: 'center' }}>
-                      <Typography variant="h4" sx={{ color: 'var(--color-primary)' }}>
-                        {generatedPlan.total_days}
-                      </Typography>
-                      <Typography variant="body2">Total Days</Typography>
-                    </Paper>
-                  </Grid>
-                  <Grid item xs={12} sm={6} md={3}>
-                    <Paper sx={{ p: 2, textAlign: 'center' }}>
-                      <Typography variant="h4" sx={{ color: 'var(--color-primary)' }}>
-                        {generatedPlan.sessions?.length || 0}
-                      </Typography>
-                      <Typography variant="body2">Training Sessions</Typography>
-                    </Paper>
-                  </Grid>
-                  <Grid item xs={12} sm={6} md={3}>
-                    <Paper sx={{ p: 2, textAlign: 'center' }}>
-                      <Typography variant="h4" sx={{ color: 'var(--color-primary)' }}>
-                        {generatedPlan.matches?.length || 0}
-                      </Typography>
-                      <Typography variant="body2">Matches</Typography>
-                    </Paper>
-                  </Grid>
-                  <Grid item xs={12} sm={6} md={3}>
-                    <Paper sx={{ p: 2, textAlign: 'center' }}>
-                      <Typography variant="h4" sx={{ color: 'var(--color-primary)' }}>
-                        {(() => {
-                          if (formData?.startDate && formData?.endDate) {
-                            const startDate = new Date(formData.startDate);
-                            const endDate = new Date(formData.endDate);
-                            const daysDiff = Math.ceil((endDate - startDate) / (1000 * 60 * 60 * 24)) + 1;
-                            return Math.ceil(daysDiff / 7);
-                          }
-                          return 0;
-                        })()}
-                      </Typography>
-                      <Typography variant="body2">Weeks</Typography>
-                    </Paper>
-                  </Grid>
-                </Grid>
-              </Card>
-            )}
-          </Box>
-        );
-      case 2:
         return (
           <Box sx={{ maxWidth: 1200, mx: 'auto' }}>
             {generatedPlan?.sessions && (
