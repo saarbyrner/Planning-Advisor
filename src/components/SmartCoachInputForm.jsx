@@ -218,7 +218,7 @@ const SmartCoachInputForm = ({ onGeneratePlan, loading = false }) => {
           </Paper>
         </Grid>
 
-        {/* AI Schedule Preview */}
+        {/* AI Schedule Configuration */}
         <Grid item xs={12}>
           <Paper sx={{ p: 3, backgroundColor: 'var(--color-background-secondary)' }}>
             <Typography variant="h6" sx={{ 
@@ -229,7 +229,7 @@ const SmartCoachInputForm = ({ onGeneratePlan, loading = false }) => {
               color: 'var(--color-text-primary)'
             }}>
               <CalendarTodayOutlined />
-              AI Schedule Preview
+              AI Schedule Configuration
             </Typography>
             
             <Grid container spacing={2} sx={{ mb: 2 }}>
